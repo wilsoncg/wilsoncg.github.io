@@ -14,7 +14,7 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 repository: wilsoncg/wilsoncg.github.io
-title: www.wilsoncg.net
+title: wilsoncg.net
 email: craig@NOSPAMwilsoncg.net
 description: > # this means to ignore newlines until "baseurl:"
   
