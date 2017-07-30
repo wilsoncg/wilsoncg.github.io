@@ -1,18 +1,13 @@
 ---
-layout: default
-title: About
+layout: about
+title: "About"
 permalink: /about/
 ---
 
-This is the dinky Jekyll theme. You can find out more info about customizing your Jekyll theme, as well as basic Jekyll usage documentation at [jekyllrb.com](https://jekyllrb.com/)
+Hi there, I'm Craig.
 
-You can find the source code for Minima at GitHub:
-[jekyll][jekyll-organization] /
-[dinky](https://github.com/jekyll/dinky)
+I'm a C#/.Net developer by day, but I like to work on other [projects]({{ site.baseurl }}{% link projects.md %}) in my free time. 
 
-You can find the source code for Jekyll at GitHub:
-[jekyll][jekyll-organization] /
-[jekyll](https://github.com/jekyll/jekyll)
-
+This website is based on the basically-basic Jekyll theme, with some minor customizations. You can find the source code for this theme at: {% include icon-github.html username="mmistakes" %}/[jekyll-theme-basically-basic](https://github.com/mmistakes/jekyll-theme-basically-basic)
 
 [jekyll-organization]: https://github.com/jekyll
