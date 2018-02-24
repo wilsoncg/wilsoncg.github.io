@@ -30,11 +30,12 @@ breadcrumbs: true
 markdown: kramdown
 remote_theme: "mmistakes/minimal-mistakes-jekyll"
 minimal_mistakes_skin: "air"
-gems:
+plugins:
   - jekyll-feed
   - jekyll-seo-tag
   - jekyll-sitemap
   - jekyll-paginate
+  - jekyll-remote-theme
 
 # Pagination - https://jekyllrb.com/docs/pagination/
 paginate: 10
