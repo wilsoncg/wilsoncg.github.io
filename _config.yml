@@ -14,7 +14,7 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 
-minimal_mistakes_skin : "air" # "air", "aqua", "contrast", "dark", "dirt", "neon", "mint", "plum", "sunrise"
+minimal_mistakes_skin : "contrast" # "air", "aqua", "contrast", "dark", "dirt", "neon", "mint", "plum", "sunrise"
 lang: en-GB
 title: wilsoncg.net
 email: craig@NOSPAMwilsoncg.net
@@ -29,7 +29,8 @@ logo: "/assets/nikita_golubev_computer.svg"
 breadcrumbs: true
 
 # Build settings
-remote_theme: "mmistakes/minimal-mistakes"
+remote_theme: mmistakes/minimal-mistakes
+# theme: minimal-mistakes-jekyll
 
 # Reading Files
 include:
@@ -159,7 +160,7 @@ defaults:
     values:
       layout: single
       author_profile: true
-      read_time: true
-      comments: # true
-      share: true
+      read_time: false
+      comments: false
+      share: false
       related: true
