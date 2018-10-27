@@ -4,7 +4,7 @@ title: "Projects"
 permalink: /projects/
 date: 2018-11-27 23:23:00
 intro: 
-  - excerpt: 'In my free time I'm actively developing with F# and the Microsoft Azure cloud platform. I'm developing a bot which runs as a serverless function and uses language understanding (LUIS) as a means to enhance my knowledge in this area.'
+  - excerpt: "In my free time I'm actively developing with F# and the Microsoft Azure cloud platform. I'm developing a bot which runs as a serverless function and uses language understanding (LUIS) as a means to enhance my knowledge in this area."
 feature_row:
   - image_path: /assets/001-bot.svg
     alt: "bot"
