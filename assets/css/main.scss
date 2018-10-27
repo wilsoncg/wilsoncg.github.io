@@ -1,3 +1,14 @@
-.archive__item-teaser img {
-    padding: 25%;
+---
+# Only the main Sass file needs front matter (the dashes are enough)
+---
+
+@charset "utf-8";
+
+@import "minimal-mistakes/skins/{{ site.minimal_mistakes_skin | default: 'default' }}"; // skin
+@import "minimal-mistakes"; // main partials
+
+@media (min-width: 80em) {
+    .archive__item-teaser img {
+        padding: 25%;
+    }
 }
