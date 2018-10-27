@@ -5,3 +5,7 @@ permalink: /projects/
 ---
 
 Projects
+
+F# Xplot
+
+Azure serverless C# bot
