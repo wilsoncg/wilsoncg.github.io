@@ -30,6 +30,8 @@ breadcrumbs: true
 
 # Build settings
 remote_theme: mmistakes/minimal-mistakes
+# uncomment to lock remote theme to v4.13.0
+# remote_theme: "mmistakes/minimal-mistakes@4.13.0"
 # theme: minimal-mistakes-jekyll
 
 # Reading Files
@@ -107,6 +109,7 @@ plugins:
   - jekyll-gist
   - jekyll-feed
   - jemoji
+  - jekyll-include-cache
 
 # mimic GitHub Pages with --safe
 whitelist:
