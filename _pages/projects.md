@@ -26,4 +26,4 @@ feature_row:
 
 {% include feature_row %}
 
-###### Images courtesy of [https://www.flaticon.com/authors/freepik][(ttps://www.flaticon.com/authors/freepik)
+###### Images courtesy of [https://www.flaticon.com/authors/freepik](https://www.flaticon.com/authors/freepik)
