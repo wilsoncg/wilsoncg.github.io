@@ -5,10 +5,9 @@ author_profile: false
 header:
   overlay_color: "#fff"
   overlay_filter: "0.0"
-  overlay_image: /assets/splash-blue-min.png
+  overlay_image: /assets/headers/splash-blue-min.png
   cta_label: "Projects"
   cta_url: "/projects/"
-  caption: "Sant Antoni de Portmany, Ibiza"
 ---
 
 {% include feature_row id="intro" type="center" %}
