@@ -27,6 +27,7 @@ twitter_username:
 github_username:  wilsoncg
 logo: "/assets/nikita_golubev_computer.svg"
 breadcrumbs: true
+search: true
 
 # Build settings
 remote_theme: mmistakes/minimal-mistakes
