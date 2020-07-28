@@ -14,4 +14,4 @@ header:
 
 Hi there, I'm Craig.
 
-I'm a C#/.Net developer by day, but I like to work on other [projects]({{ site.baseurl }}{% link _pages/projects.md %}) in my free time. 
+I'm a C#/.Net developer by day, but I like to work on other [projects]({{ site.baseurl }}{% link _pages/projects.md %}) in my free time.  
