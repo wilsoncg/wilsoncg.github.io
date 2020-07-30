@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-GB"><generator uri="https://jekyllrb.com/" version="3.7.4">Jekyll</generator><link href="http://0.0.0.0:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://0.0.0.0:4000/" rel="alternate" type="text/html" hreflang="en-GB" /><updated>2020-07-28T11:01:20-05:00</updated><id>http://0.0.0.0:4000/</id><title type="html">wilsoncg.net</title><subtitle></subtitle><entry><title type="html">Remove skype context menu with powershell</title><link href="http://0.0.0.0:4000/powershell/remove-skype-context-menu/" rel="alternate" type="text/html" title="Remove skype context menu with powershell" /><published>2020-07-28T08:47:00-05:00</published><updated>2020-07-28T08:47:00-05:00</updated><id>http://0.0.0.0:4000/powershell/remove-skype-context-menu</id><content type="html" xml:base="http://0.0.0.0:4000/powershell/remove-skype-context-menu/">&lt;p&gt;Although powershell is enabled by default when installing Windows Terminal, it seems the development team have overlooked the scenario where you want to run a script as Admin and don’t want to context switch. Adding the below entry into your terminal settings json file will give you a powershell admin prompt.&lt;/p&gt;
+
+&lt;p&gt;Enable run powershell as admin (in windows terminal):&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-json&quot; data-lang=&quot;json&quot;&gt;&lt;span class=&quot;err&quot;&gt;//&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;err&quot;&gt;https&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;//github.com/microsoft/terminal/issues/&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;632&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;guid&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;{42f54c7a-0364-4ce2-bbb6-81efb79ec97f}&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;hidden&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;name&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;Powershell (Admin)&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;commandline&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;%SystemRoot%&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;System32&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;WindowsPowerShell&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;v1.0&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;powershell.exe -command Start-Process -Verb RunAs &lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;shell:appsFolder&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;Microsoft.WindowsTerminal_8wekyb3d8bbwe!App&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\&quot;&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+    &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;icon&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;w&quot;&gt; &lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;ms-appx:///Images/Square44x44Logo.targetsize-32.png&quot;&lt;/span&gt;&lt;span class=&quot;w&quot;&gt;
+&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Remove that pesky right click context menu:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-powershell&quot; data-lang=&quot;powershell&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$subPath&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;HKLM:\SOFTWARE\Classes\packagedcom\package\&quot;&lt;/span&gt;
+
+&lt;span class=&quot;nv&quot;&gt;$skypePackageId&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; 
+    &lt;span class=&quot;nb&quot;&gt;dir&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$subPath&lt;/span&gt; | 
+    ? &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$_&lt;/span&gt;.Name -like &lt;span class=&quot;s1&quot;&gt;'*skypeapp*'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt; | 
+    &lt;span class=&quot;nb&quot;&gt;select-object&lt;/span&gt; -Property name | 
+    % &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$_&lt;/span&gt;.Name &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt; | 
+    &lt;span class=&quot;nb&quot;&gt;split-path&lt;/span&gt; -Leaf
+
+&lt;span class=&quot;nv&quot;&gt;$withoutClassId&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$subpath&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt; + &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$skypePackageId&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;\class\&quot;&lt;/span&gt;
+
+&lt;span class=&quot;nv&quot;&gt;$classId&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; 
+    &lt;span class=&quot;nb&quot;&gt;dir&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$withoutClassId&lt;/span&gt; | 
+    ? &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$_&lt;/span&gt;.Property -like &lt;span class=&quot;s1&quot;&gt;'*DllPath*'&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt; | 
+    % &lt;span class=&quot;o&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$_&lt;/span&gt;.Name &lt;span class=&quot;o&quot;&gt;}&lt;/span&gt; |
+    &lt;span class=&quot;nb&quot;&gt;split-path&lt;/span&gt; -leaf    
+
+&lt;span class=&quot;nv&quot;&gt;$pathWithClassId&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$subpath&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt; + &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$skypePackageId&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;\class\&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$classId&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;((&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;Test-Path&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$pathWithClassId&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; -and &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$classId&lt;/span&gt; -ne &lt;span class=&quot;nv&quot;&gt;$null&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;nb&quot;&gt;Write-Host&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Found &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;$pathWithClassId&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
+    &lt;span class=&quot;nb&quot;&gt;pushd&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$withoutClassId&lt;/span&gt;
+    &lt;span class=&quot;nb&quot;&gt;remove-item&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;$classId&lt;/span&gt; -confirm
+    &lt;span class=&quot;nb&quot;&gt;popd&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;</content><author><name></name></author><category term="powershell" /><category term="skype" /><category term="registry" /><category term="windows terminal" /><summary type="html">Although powershell is enabled by default when installing Windows Terminal, it seems the development team have overlooked the scenario where you want to run a script as Admin and don’t want to context switch. Adding the below entry into your terminal settings json file will give you a powershell admin prompt. Enable run powershell as admin (in windows terminal): // https://github.com/microsoft/terminal/issues/632 { &quot;guid&quot;: &quot;{42f54c7a-0364-4ce2-bbb6-81efb79ec97f}&quot;, &quot;hidden&quot;: false, &quot;name&quot;: &quot;Powershell (Admin)&quot;, &quot;commandline&quot;: &quot;%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -command Start-Process -Verb RunAs \&quot;shell:appsFolder\\Microsoft.WindowsTerminal_8wekyb3d8bbwe!App\&quot;&quot;, &quot;icon&quot;: &quot;ms-appx:///Images/Square44x44Logo.targetsize-32.png&quot; } Remove that pesky right click context menu: $subPath = &quot;HKLM:\SOFTWARE\Classes\packagedcom\package\&quot; $skypePackageId = dir $subPath | ? { $_.Name -like '*skypeapp*' } | select-object -Property name | % { $_.Name } | split-path -Leaf $withoutClassId = &quot;$subpath&quot; + &quot;$skypePackageId\class\&quot; $classId = dir $withoutClassId | ? { $_.Property -like '*DllPath*' } | % { $_.Name } | split-path -leaf $pathWithClassId = &quot;$subpath&quot; + &quot;$skypePackageId\class\$classId&quot; if((Test-Path $pathWithClassId) -and ($classId -ne $null)) { Write-Host &quot;Found $pathWithClassId&quot; pushd $withoutClassId remove-item $classId -confirm popd }</summary></entry><entry><title type="html">Docker plus Jekyll equals win</title><link href="http://0.0.0.0:4000/jekyll/docker-plus-jekyll-equals-win/" rel="alternate" type="text/html" title="Docker plus Jekyll equals win" /><published>2020-02-26T05:00:00-06:00</published><updated>2020-02-26T05:00:00-06:00</updated><id>http://0.0.0.0:4000/jekyll/docker-plus-jekyll-equals-win</id><content type="html" xml:base="http://0.0.0.0:4000/jekyll/docker-plus-jekyll-equals-win/">&lt;p&gt;I’ve started to spend more time looking at docker. A useful excerise has been to use the docker jekyll image to setup a working development environment.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;/jekyll/down-the-rabbit-hole/&quot;&gt;Previously&lt;/a&gt;, it took me 2 days of configuring my windows 10 desktop with:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Correct version of Ruby installed&lt;/li&gt;
+  &lt;li&gt;Ruby gems installed &amp;amp; configured correctly&lt;/li&gt;
+  &lt;li&gt;Make installed (in the event you need to modify &amp;amp; rebuild some part of the toolchain)&lt;/li&gt;
+  &lt;li&gt;Appropriate version of libcurl installed &amp;amp; setup&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;At any point in the setup process you will encounter an error, attempt to use google to get more context, scroll through various github issues &amp;amp; stackoverflow posts, and then try various combinations of command line arguments until each error is resolved.&lt;/p&gt;
+
+&lt;p&gt;Fast forward 6 months, a new OS update is applied which uknowingly touches one of those components and the whole stack of cards comes crashing down. In the software development world we are all too familiar with &lt;a href=&quot;https://en.wiktionary.org/wiki/yak_shaving&quot;&gt;yak shaving&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Fortunately this problem has been solved. By using automation and the &lt;a href=&quot;https://ddewaele.github.io/running-jekyll-in-docker/&quot;&gt;docker toolchain&lt;/a&gt;, the process now becomes a 2 hour task:&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Install docker&lt;/li&gt;
+  &lt;li&gt;Learn docker&lt;/li&gt;
+  &lt;li&gt;Run 2 docker commands&lt;/li&gt;
+  &lt;li&gt;Start developing&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;You could argue learning docker is yet more yak shaving, but the benefit to this learning, is that docker becomes another tool in the toolbox which can hugely shorten the software development and delivery lifecycle.&lt;/p&gt;</content><author><name></name></author><category term="jekyll" /><category term="docker" /><category term="github pages" /><summary type="html">I’ve started to spend more time looking at docker. A useful excerise has been to use the docker jekyll image to setup a working development environment. Previously, it took me 2 days of configuring my windows 10 desktop with: Correct version of Ruby installed Ruby gems installed &amp;amp; configured correctly Make installed (in the event you need to modify &amp;amp; rebuild some part of the toolchain) Appropriate version of libcurl installed &amp;amp; setup At any point in the setup process you will encounter an error, attempt to use google to get more context, scroll through various github issues &amp;amp; stackoverflow posts, and then try various combinations of command line arguments until each error is resolved. Fast forward 6 months, a new OS update is applied which uknowingly touches one of those components and the whole stack of cards comes crashing down. In the software development world we are all too familiar with yak shaving. Fortunately this problem has been solved. By using automation and the docker toolchain, the process now becomes a 2 hour task: Install docker Learn docker Run 2 docker commands Start developing You could argue learning docker is yet more yak shaving, but the benefit to this learning, is that docker becomes another tool in the toolbox which can hugely shorten the software development and delivery lifecycle.</summary></entry><entry><title type="html">Don’t fear the monad</title><link href="http://0.0.0.0:4000/monads/monads/" rel="alternate" type="text/html" title="Don't fear the monad" /><published>2018-03-24T06:35:00-05:00</published><updated>2018-03-24T06:35:00-05:00</updated><id>http://0.0.0.0:4000/monads/monads</id><content type="html" xml:base="http://0.0.0.0:4000/monads/monads/">&lt;p&gt;A bunch of useful links covering monads in F# and C#.&lt;/p&gt;
+
+&lt;h2 id=&quot;videos&quot;&gt;Videos&lt;/h2&gt;
+
+&lt;p&gt;What is a Monad?
+&lt;a href=&quot;https://www.youtube.com/watch?v=t1e8gqXLbsU&quot;&gt;
+&lt;img src=&quot;/assets/monads-01-what-is-a-monad.png&quot; alt=&quot;What is a monad?&quot; /&gt;
+&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Brian Beckman - Don’t fear the Monad
+&lt;a href=&quot;https://www.youtube.com/watch?v=ZhuHCtR3xq8&quot;&gt;
+&lt;img src=&quot;/assets/monads-02-dont-fear-the-monad.png&quot; alt=&quot;Don't fear the Monad&quot; /&gt;
+&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&quot;links&quot;&gt;Links&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://blogs.msdn.microsoft.com/wesdyer/2008/01/10/the-marvels-of-monads/&quot;&gt;https://blogs.msdn.microsoft.com/wesdyer/2008/01/10/the-marvels-of-monads/&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://github.com/fsprojects/FSharpx.Extras/blob/master/tests/FSharpx.CSharpTests/ValidationExample.cs&quot;&gt;https://github.com/fsprojects/FSharpx.Extras/blob/master/tests/FSharpx.CSharpTests/ValidationExample.cs&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://blog.leifbattermann.de/2015/09/12/error-handling-with-applicative-functors-in-f-and-c/&quot;&gt;http://blog.leifbattermann.de/2015/09/12/error-handling-with-applicative-functors-in-f-and-c/&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://bugsquash.blogspot.nl/2011/08/validating-with-applicative-functors-in.html&quot;&gt;http://bugsquash.blogspot.nl/2011/08/validating-with-applicative-functors-in.html&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://hestia.typepad.com/flatlander/2011/06/partial-function-application-in-f-index.html&quot;&gt;http://hestia.typepad.com/flatlander/2011/06/partial-function-application-in-f-index.html&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://codebetter.com/matthewpodwysocki/2010/01/18/much-ado-about-monads-creating-extended-builders/&quot;&gt;http://codebetter.com/matthewpodwysocki/2010/01/18/much-ado-about-monads-creating-extended-builders/&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://blog.ploeh.dk/2017/01/03/decoupling-application-errors-from-domain-models/&quot;&gt;http://blog.ploeh.dk/2017/01/03/decoupling-application-errors-from-domain-models/&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://fsharpforfunandprofit.com/series/computation-expressions.html&quot;&gt;https://fsharpforfunandprofit.com/series/computation-expressions.html&lt;/a&gt;&lt;/p&gt;</content><author><name></name></author><category term="monads" /><category term="monoids" /><category term="category theory" /><category term="functional programming" /><category term="f#" /><category term="linq" /><summary type="html">A bunch of useful links covering monads in F# and C#. Videos What is a Monad? Brian Beckman - Don’t fear the Monad Links https://blogs.msdn.microsoft.com/wesdyer/2008/01/10/the-marvels-of-monads/ https://github.com/fsprojects/FSharpx.Extras/blob/master/tests/FSharpx.CSharpTests/ValidationExample.cs http://blog.leifbattermann.de/2015/09/12/error-handling-with-applicative-functors-in-f-and-c/ http://bugsquash.blogspot.nl/2011/08/validating-with-applicative-functors-in.html http://hestia.typepad.com/flatlander/2011/06/partial-function-application-in-f-index.html http://codebetter.com/matthewpodwysocki/2010/01/18/much-ado-about-monads-creating-extended-builders/ http://blog.ploeh.dk/2017/01/03/decoupling-application-errors-from-domain-models/ https://fsharpforfunandprofit.com/series/computation-expressions.html</summary></entry><entry><title type="html">Down the rabbit hole</title><link href="http://0.0.0.0:4000/jekyll/down-the-rabbit-hole/" rel="alternate" type="text/html" title="Down the rabbit hole" /><published>2018-02-25T07:54:00-06:00</published><updated>2018-02-25T07:54:00-06:00</updated><id>http://0.0.0.0:4000/jekyll/down-the-rabbit-hole</id><content type="html" xml:base="http://0.0.0.0:4000/jekyll/down-the-rabbit-hole/">&lt;p&gt;“Just setup jekyll on your local windows 10 machine” they said, how hard can it be?&lt;/p&gt;
+
+&lt;p&gt;You’ve installed ruby, then jekyll. Created a site, found a theme, installed some gems, bundled something and now you have some html served up on port 4000. But wait a minute, now your console is full of warnings:&lt;/p&gt;
+
+&lt;h3 id=&quot;sass-40-deprecated-function-call&quot;&gt;Sass 4.0 deprecated function call&lt;/h3&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;DEPRECATION WARNING: Passing a string to call() is deprecated and will be illegal in Sass 4.0. Use call(get-function(“mixin-exists”)) instead.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Ok, that should be easily fixed, just update the theme:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;RUNTIME DEPENDENCIES (7):&lt;/p&gt;
+
+  &lt;p&gt;jekyll ~&amp;gt; 3.6&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Oh right, you’re running jekyll 3.5, time to upgrade! You better use ridk, and where’s msys2:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;MSYS2 could not be found.&lt;/p&gt;
+
+  &lt;p&gt;Please download and install MSYS2 from https://msys2.github.io/&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Fine, I’ll just install msys2:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;:: msys2-runtime and catgets are in conflict. Remove catgets? [y/N]&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Ah of course, the old catgets, who invited you to the party anyway.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Dependency Error: Yikes! It looks like you don’t have jekyll-remote-theme or one of its dependencies installed. In order to use Jekyll as currently configured , you’ll need to install this gem. The full error message from Ruby is: ‘Could n ot open library ‘libcurl’: (illegal characters) . Could not open libr ary ‘libcurl.dll’: (illegal characters) . Could not open library ‘lib curl.so.4’: (illegal characters) . Could not open library ‘libcurl.so .4.dll’: (illegal characters) ‘ If you run into trouble, you can find helpful resources at https://jekyllrb.com/help/!&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-markdown&quot; data-lang=&quot;markdown&quot;&gt;gem install jekyll-remote-theme
+make &quot;DESTDIR=&quot; clean
+'make' is not recognized as an internal or external command, operable program or batch file.&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Oh now we’re onto a whole new world of pain. So now I’m fiddling around with pacman, on msys2, updating gcc toolchains… Right, let’s get back to the job at hand and install libcurl:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-markdown&quot; data-lang=&quot;markdown&quot;&gt;gem install curb -- --with-curl-lib=&quot;C:/curl-7.27.0-devel-mingw32/bin&quot; --with-curl-include=&quot;C:/curl-7.27.0-devel-mingw32/include&quot;
+This could take a while...
+ERROR: Error installing curb:
+Can't find libcurl or curl/curl.h (RuntimeError)&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;We’re deep in the rabbit hole now, I’ve forgotten why we started this journey in the first place 🤔. Some downloading and extracting of various libcurl builds later, oh and renaming libcurl-x64.dll to libcurl.dll. Finally curb has done something. Let’s try again:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-markdown&quot; data-lang=&quot;markdown&quot;&gt;Remote Theme: Downloading https://codeload.github.com/mmistakes/minimal-mistakes/zip/master to C:/AppData/Local/Temp/jekyll-remote-theme-20171109-11884-1vg93xx.zip
+ETHON: Libcurl initialized
+SSL certificate problem: unable to get local issuer certificate&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;I see, of course you have to have the latest ca-cert-bundle.crt, oh and don’t forget to set the environment variables:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-markdown&quot; data-lang=&quot;markdown&quot;&gt;CURL_CA_BUNDLE=C:&lt;span class=&quot;se&quot;&gt;\R&lt;/span&gt;uby&lt;span class=&quot;se&quot;&gt;\b&lt;/span&gt;in&lt;span class=&quot;se&quot;&gt;\c&lt;/span&gt;a-bundle.crt
+SSL_CERT_FILE=C:&lt;span class=&quot;se&quot;&gt;\R&lt;/span&gt;uby&lt;span class=&quot;se&quot;&gt;\b&lt;/span&gt;in&lt;span class=&quot;se&quot;&gt;\c&lt;/span&gt;acert.pem&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Try again:&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;SSL certificate problem: unable to get local issuer certificate&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Oh right, still doesn’t work. What exactly are those environment variables doing anyway:&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;http://www.rubydoc.info/gems/ethon/0.5.0/Ethon/Easy&quot;&gt;http://www.rubydoc.info/gems/ethon/0.5.0/Ethon/Easy&lt;/a&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;The CURLOPT_CAPATH function apparently does not work in Windows due to some limitation in openssl.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://stackoverflow.com/questions/37551409/configure-curl-to-use-default-system-cert-store&quot;&gt;https://stackoverflow.com/questions/37551409/configure-curl-to-use-default-system-cert-store&lt;/a&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;OpenSSL does not support using the “CA certificate store” that Windows has on its own. If you want your curl build to use that cert store, you need to rebuild curl to use the schannel backend instead&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;This could be the end of the adventure, we could either download the OpenSSL source and rebuild on windows with WinSSL or find someone who has already built libcurl with WinSSL. Wait a minute, what’s this:&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://skanthak.homepage.t-online.de/curl.html&quot;&gt;https://skanthak.homepage.t-online.de/curl.html&lt;/a&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;X:&amp;gt; i386\curl.exe -V&lt;/p&gt;
+
+  &lt;p&gt;curl 7.58.0 (i386-pc-win32) libcurl/7.58.0 WinSSL zlib/1.2.11&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Finally, 2 days later and I have a functioning jekyll setup on windows 10 with libcurl and jekyll-remote-theme. That was really fun 🤮.&lt;/p&gt;</content><author><name></name></author><category term="jekyll" /><category term="jekyll themes" /><category term="remote themes" /><category term="github pages" /><category term="open source" /><category term="msys2" /><category term="mingw" /><category term="gcc" /><category term="curl" /><category term="libcurl" /><category term="winssl" /><summary type="html">“Just setup jekyll on your local windows 10 machine” they said, how hard can it be? You’ve installed ruby, then jekyll. Created a site, found a theme, installed some gems, bundled something and now you have some html served up on port 4000. But wait a minute, now your console is full of warnings: Sass 4.0 deprecated function call DEPRECATION WARNING: Passing a string to call() is deprecated and will be illegal in Sass 4.0. Use call(get-function(“mixin-exists”)) instead. Ok, that should be easily fixed, just update the theme: RUNTIME DEPENDENCIES (7): jekyll ~&amp;gt; 3.6 Oh right, you’re running jekyll 3.5, time to upgrade! You better use ridk, and where’s msys2: MSYS2 could not be found. Please download and install MSYS2 from https://msys2.github.io/ Fine, I’ll just install msys2: :: msys2-runtime and catgets are in conflict. Remove catgets? [y/N] Ah of course, the old catgets, who invited you to the party anyway. Dependency Error: Yikes! It looks like you don’t have jekyll-remote-theme or one of its dependencies installed. In order to use Jekyll as currently configured , you’ll need to install this gem. The full error message from Ruby is: ‘Could n ot open library ‘libcurl’: (illegal characters) . Could not open libr ary ‘libcurl.dll’: (illegal characters) . Could not open library ‘lib curl.so.4’: (illegal characters) . Could not open library ‘libcurl.so .4.dll’: (illegal characters) ‘ If you run into trouble, you can find helpful resources at https://jekyllrb.com/help/! gem install jekyll-remote-theme make &quot;DESTDIR=&quot; clean 'make' is not recognized as an internal or external command, operable program or batch file. Oh now we’re onto a whole new world of pain. So now I’m fiddling around with pacman, on msys2, updating gcc toolchains… Right, let’s get back to the job at hand and install libcurl: gem install curb -- --with-curl-lib=&quot;C:/curl-7.27.0-devel-mingw32/bin&quot; --with-curl-include=&quot;C:/curl-7.27.0-devel-mingw32/include&quot; This could take a while... ERROR: Error installing curb: Can't find libcurl or curl/curl.h (RuntimeError) We’re deep in the rabbit hole now, I’ve forgotten why we started this journey in the first place 🤔. Some downloading and extracting of various libcurl builds later, oh and renaming libcurl-x64.dll to libcurl.dll. Finally curb has done something. Let’s try again: Remote Theme: Downloading https://codeload.github.com/mmistakes/minimal-mistakes/zip/master to C:/AppData/Local/Temp/jekyll-remote-theme-20171109-11884-1vg93xx.zip ETHON: Libcurl initialized SSL certificate problem: unable to get local issuer certificate I see, of course you have to have the latest ca-cert-bundle.crt, oh and don’t forget to set the environment variables: CURL_CA_BUNDLE=C:\Ruby\bin\ca-bundle.crt SSL_CERT_FILE=C:\Ruby\bin\cacert.pem Try again: SSL certificate problem: unable to get local issuer certificate Oh right, still doesn’t work. What exactly are those environment variables doing anyway: http://www.rubydoc.info/gems/ethon/0.5.0/Ethon/Easy The CURLOPT_CAPATH function apparently does not work in Windows due to some limitation in openssl. https://stackoverflow.com/questions/37551409/configure-curl-to-use-default-system-cert-store OpenSSL does not support using the “CA certificate store” that Windows has on its own. If you want your curl build to use that cert store, you need to rebuild curl to use the schannel backend instead This could be the end of the adventure, we could either download the OpenSSL source and rebuild on windows with WinSSL or find someone who has already built libcurl with WinSSL. Wait a minute, what’s this: https://skanthak.homepage.t-online.de/curl.html X:&amp;gt; i386\curl.exe -V curl 7.58.0 (i386-pc-win32) libcurl/7.58.0 WinSSL zlib/1.2.11 Finally, 2 days later and I have a functioning jekyll setup on windows 10 with libcurl and jekyll-remote-theme. That was really fun 🤮.</summary></entry><entry><title type="html">Jekyll up and running</title><link href="http://0.0.0.0:4000/jekyll/welcome-to-jekyll/" rel="alternate" type="text/html" title="Jekyll up and running" /><published>2017-07-09T10:36:51-05:00</published><updated>2017-07-09T10:36:51-05:00</updated><id>http://0.0.0.0:4000/jekyll/welcome-to-jekyll</id><content type="html" xml:base="http://0.0.0.0:4000/jekyll/welcome-to-jekyll/">&lt;p&gt;Jekyll is a tool to create static web pages generated from markdown files. This means you don’t have to worry about paying for wordpress hosting, or worse setting up a LAMP server, with MySQL/PHP just to host a blog. It’s got some really useful features, such as syntax highlighting for all the languages that github supports:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-csharp&quot; data-lang=&quot;csharp&quot;&gt;&lt;span class=&quot;k&quot;&gt;public&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;void&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;Hello&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;Action&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;string&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;helloThere&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt; 
+    &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+      &lt;span class=&quot;n&quot;&gt;Console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nf&quot;&gt;WriteLine&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;$&quot;Hi, &lt;/span&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+    &lt;span class=&quot;p&quot;&gt;};&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;helloThere&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;nf&quot;&gt;Hello&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Tom&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;err&quot;&gt;#&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;prints&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;'&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Tom&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;'&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Check out the &lt;a href=&quot;https://jekyllrb.com/docs/home&quot;&gt;Jekyll docs&lt;/a&gt; for more info on how to use Jekyll.&lt;/p&gt;</content><author><name></name></author><category term="jekyll" /><category term="front matter" /><category term="getting started" /><category term="github pages" /><summary type="html">Jekyll is a tool to create static web pages generated from markdown files. This means you don’t have to worry about paying for wordpress hosting, or worse setting up a LAMP server, with MySQL/PHP just to host a blog. It’s got some really useful features, such as syntax highlighting for all the languages that github supports: public void Hello(string name) { Action&amp;lt;string&amp;gt; helloThere = (n) =&amp;gt; { Console.WriteLine($&quot;Hi, {n}&quot;); }; helloThere(name); } Hello(&quot;Tom&quot;) #=&amp;gt; prints 'Hi, Tom' to the Console. Check out the Jekyll docs for more info on how to use Jekyll.</summary></entry></feed>

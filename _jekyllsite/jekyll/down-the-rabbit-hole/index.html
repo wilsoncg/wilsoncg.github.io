@@ -1,0 +1,660 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.19.3 by Michael Rose
+  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Down the rabbit hole - wilsoncg.net</title>
+<meta name="description" content="“Just setup jekyll on your local windows 10 machine” they said, how hard can it be?  You’ve installed ruby, then jekyll. Created a site, found a theme, installed some gems, bundled something and now you have some html served up on port 4000. But wait a minute, now your console is full of warnings:  Sass 4.0 deprecated function call     DEPRECATION WARNING: Passing a string to call() is deprecated and will be illegal in Sass 4.0. Use call(get-function(“mixin-exists”)) instead.   Ok, that should be easily fixed, just update the theme:     RUNTIME DEPENDENCIES (7):    jekyll ~&gt; 3.6   Oh right, you’re running jekyll 3.5, time to upgrade! You better use ridk, and where’s msys2:     MSYS2 could not be found.    Please download and install MSYS2 from https://msys2.github.io/   Fine, I’ll just install msys2:     :: msys2-runtime and catgets are in conflict. Remove catgets? [y/N]   Ah of course, the old catgets, who invited you to the party anyway.     Dependency Error: Yikes! It looks like you don’t have jekyll-remote-theme or one of its dependencies installed. In order to use Jekyll as currently configured , you’ll need to install this gem. The full error message from Ruby is: ‘Could n ot open library ‘libcurl’: (illegal characters) . Could not open libr ary ‘libcurl.dll’: (illegal characters) . Could not open library ‘lib curl.so.4’: (illegal characters) . Could not open library ‘libcurl.so .4.dll’: (illegal characters) ‘ If you run into trouble, you can find helpful resources at https://jekyllrb.com/help/!   gem install jekyll-remote-theme make &quot;DESTDIR=&quot; clean &#39;make&#39; is not recognized as an internal or external command, operable program or batch file.  Oh now we’re onto a whole new world of pain. So now I’m fiddling around with pacman, on msys2, updating gcc toolchains… Right, let’s get back to the job at hand and install libcurl:  gem install curb -- --with-curl-lib=&quot;C:/curl-7.27.0-devel-mingw32/bin&quot; --with-curl-include=&quot;C:/curl-7.27.0-devel-mingw32/include&quot; This could take a while... ERROR: Error installing curb: Can&#39;t find libcurl or curl/curl.h (RuntimeError)  We’re deep in the rabbit hole now, I’ve forgotten why we started this journey in the first place 🤔. Some downloading and extracting of various libcurl builds later, oh and renaming libcurl-x64.dll to libcurl.dll. Finally curb has done something. Let’s try again:  Remote Theme: Downloading https://codeload.github.com/mmistakes/minimal-mistakes/zip/master to C:/AppData/Local/Temp/jekyll-remote-theme-20171109-11884-1vg93xx.zip ETHON: Libcurl initialized SSL certificate problem: unable to get local issuer certificate  I see, of course you have to have the latest ca-cert-bundle.crt, oh and don’t forget to set the environment variables:  CURL_CA_BUNDLE=C:\Ruby\bin\ca-bundle.crt SSL_CERT_FILE=C:\Ruby\bin\cacert.pem  Try again:     SSL certificate problem: unable to get local issuer certificate   Oh right, still doesn’t work. What exactly are those environment variables doing anyway:  http://www.rubydoc.info/gems/ethon/0.5.0/Ethon/Easy    The CURLOPT_CAPATH function apparently does not work in Windows due to some limitation in openssl.   https://stackoverflow.com/questions/37551409/configure-curl-to-use-default-system-cert-store    OpenSSL does not support using the “CA certificate store” that Windows has on its own. If you want your curl build to use that cert store, you need to rebuild curl to use the schannel backend instead   This could be the end of the adventure, we could either download the OpenSSL source and rebuild on windows with WinSSL or find someone who has already built libcurl with WinSSL. Wait a minute, what’s this:  https://skanthak.homepage.t-online.de/curl.html    X:&gt; i386\curl.exe -V    curl 7.58.0 (i386-pc-win32) libcurl/7.58.0 WinSSL zlib/1.2.11   Finally, 2 days later and I have a functioning jekyll setup on windows 10 with libcurl and jekyll-remote-theme. That was really fun 🤮.">
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="wilsoncg.net">
+<meta property="og:title" content="Down the rabbit hole">
+<meta property="og:url" content="http://0.0.0.0:4000/jekyll/down-the-rabbit-hole/">
+
+
+  <meta property="og:description" content="“Just setup jekyll on your local windows 10 machine” they said, how hard can it be?  You’ve installed ruby, then jekyll. Created a site, found a theme, installed some gems, bundled something and now you have some html served up on port 4000. But wait a minute, now your console is full of warnings:  Sass 4.0 deprecated function call     DEPRECATION WARNING: Passing a string to call() is deprecated and will be illegal in Sass 4.0. Use call(get-function(“mixin-exists”)) instead.   Ok, that should be easily fixed, just update the theme:     RUNTIME DEPENDENCIES (7):    jekyll ~&gt; 3.6   Oh right, you’re running jekyll 3.5, time to upgrade! You better use ridk, and where’s msys2:     MSYS2 could not be found.    Please download and install MSYS2 from https://msys2.github.io/   Fine, I’ll just install msys2:     :: msys2-runtime and catgets are in conflict. Remove catgets? [y/N]   Ah of course, the old catgets, who invited you to the party anyway.     Dependency Error: Yikes! It looks like you don’t have jekyll-remote-theme or one of its dependencies installed. In order to use Jekyll as currently configured , you’ll need to install this gem. The full error message from Ruby is: ‘Could n ot open library ‘libcurl’: (illegal characters) . Could not open libr ary ‘libcurl.dll’: (illegal characters) . Could not open library ‘lib curl.so.4’: (illegal characters) . Could not open library ‘libcurl.so .4.dll’: (illegal characters) ‘ If you run into trouble, you can find helpful resources at https://jekyllrb.com/help/!   gem install jekyll-remote-theme make &quot;DESTDIR=&quot; clean &#39;make&#39; is not recognized as an internal or external command, operable program or batch file.  Oh now we’re onto a whole new world of pain. So now I’m fiddling around with pacman, on msys2, updating gcc toolchains… Right, let’s get back to the job at hand and install libcurl:  gem install curb -- --with-curl-lib=&quot;C:/curl-7.27.0-devel-mingw32/bin&quot; --with-curl-include=&quot;C:/curl-7.27.0-devel-mingw32/include&quot; This could take a while... ERROR: Error installing curb: Can&#39;t find libcurl or curl/curl.h (RuntimeError)  We’re deep in the rabbit hole now, I’ve forgotten why we started this journey in the first place 🤔. Some downloading and extracting of various libcurl builds later, oh and renaming libcurl-x64.dll to libcurl.dll. Finally curb has done something. Let’s try again:  Remote Theme: Downloading https://codeload.github.com/mmistakes/minimal-mistakes/zip/master to C:/AppData/Local/Temp/jekyll-remote-theme-20171109-11884-1vg93xx.zip ETHON: Libcurl initialized SSL certificate problem: unable to get local issuer certificate  I see, of course you have to have the latest ca-cert-bundle.crt, oh and don’t forget to set the environment variables:  CURL_CA_BUNDLE=C:\Ruby\bin\ca-bundle.crt SSL_CERT_FILE=C:\Ruby\bin\cacert.pem  Try again:     SSL certificate problem: unable to get local issuer certificate   Oh right, still doesn’t work. What exactly are those environment variables doing anyway:  http://www.rubydoc.info/gems/ethon/0.5.0/Ethon/Easy    The CURLOPT_CAPATH function apparently does not work in Windows due to some limitation in openssl.   https://stackoverflow.com/questions/37551409/configure-curl-to-use-default-system-cert-store    OpenSSL does not support using the “CA certificate store” that Windows has on its own. If you want your curl build to use that cert store, you need to rebuild curl to use the schannel backend instead   This could be the end of the adventure, we could either download the OpenSSL source and rebuild on windows with WinSSL or find someone who has already built libcurl with WinSSL. Wait a minute, what’s this:  https://skanthak.homepage.t-online.de/curl.html    X:&gt; i386\curl.exe -V    curl 7.58.0 (i386-pc-win32) libcurl/7.58.0 WinSSL zlib/1.2.11   Finally, 2 days later and I have a functioning jekyll setup on windows 10 with libcurl and jekyll-remote-theme. That was really fun 🤮.">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2018-02-25T07:54:00-06:00">
+
+
+
+
+
+
+<link rel="canonical" href="http://0.0.0.0:4000/jekyll/down-the-rabbit-hole/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": null,
+      "url": "http://0.0.0.0:4000/"
+    
+  }
+</script>
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="wilsoncg.net Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+          <a class="site-logo" href="/"><img src="/assets/nikita_golubev_computer.svg" alt=""></a>
+        
+        <a class="site-title" href="/">
+          wilsoncg.net
+          
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/projects/">Projects</a>
+            </li><li class="masthead__menu-item">
+              <a href="/posts/">Posts</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+  
+    
+
+
+
+<nav class="breadcrumbs">
+  <ol itemscope itemtype="https://schema.org/BreadcrumbList">
+    
+    
+    
+      
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+          <a href="http://0.0.0.0:4000/" itemprop="item"><span itemprop="name">Home</span></a>
+          <meta itemprop="position" content="1" />
+        </li>
+        <span class="sep">/</span>
+      
+      
+        
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+          <a href="/categories/#jekyll" itemprop="item"><span itemprop="name">Jekyll</span></a>
+          <meta itemprop="position" content="2" />
+        </li>
+        <span class="sep">/</span>
+      
+    
+      
+      
+        <li class="current">Down the rabbit hole</li>
+      
+    
+  </ol>
+</nav>
+
+  
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name"></h3>
+    
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Down the rabbit hole">
+    <meta itemprop="description" content="“Just setup jekyll on your local windows 10 machine” they said, how hard can it be?You’ve installed ruby, then jekyll. Created a site, found a theme, installed some gems, bundled something and now you have some html served up on port 4000. But wait a minute, now your console is full of warnings:Sass 4.0 deprecated function call  DEPRECATION WARNING: Passing a string to call() is deprecated and will be illegal in Sass 4.0. Use call(get-function(“mixin-exists”)) instead.Ok, that should be easily fixed, just update the theme:  RUNTIME DEPENDENCIES (7):  jekyll ~&gt; 3.6Oh right, you’re running jekyll 3.5, time to upgrade! You better use ridk, and where’s msys2:  MSYS2 could not be found.  Please download and install MSYS2 from https://msys2.github.io/Fine, I’ll just install msys2:  :: msys2-runtime and catgets are in conflict. Remove catgets? [y/N]Ah of course, the old catgets, who invited you to the party anyway.  Dependency Error: Yikes! It looks like you don’t have jekyll-remote-theme or one of its dependencies installed. In order to use Jekyll as currently configured , you’ll need to install this gem. The full error message from Ruby is: ‘Could n ot open library ‘libcurl’: (illegal characters) . Could not open libr ary ‘libcurl.dll’: (illegal characters) . Could not open library ‘lib curl.so.4’: (illegal characters) . Could not open library ‘libcurl.so .4.dll’: (illegal characters) ‘ If you run into trouble, you can find helpful resources at https://jekyllrb.com/help/!gem install jekyll-remote-thememake &quot;DESTDIR=&quot; clean&#39;make&#39; is not recognized as an internal or external command, operable program or batch file.Oh now we’re onto a whole new world of pain. So now I’m fiddling around with pacman, on msys2, updating gcc toolchains… Right, let’s get back to the job at hand and install libcurl:gem install curb -- --with-curl-lib=&quot;C:/curl-7.27.0-devel-mingw32/bin&quot; --with-curl-include=&quot;C:/curl-7.27.0-devel-mingw32/include&quot;This could take a while...ERROR: Error installing curb:Can&#39;t find libcurl or curl/curl.h (RuntimeError)We’re deep in the rabbit hole now, I’ve forgotten why we started this journey in the first place 🤔. Some downloading and extracting of various libcurl builds later, oh and renaming libcurl-x64.dll to libcurl.dll. Finally curb has done something. Let’s try again:Remote Theme: Downloading https://codeload.github.com/mmistakes/minimal-mistakes/zip/master to C:/AppData/Local/Temp/jekyll-remote-theme-20171109-11884-1vg93xx.zipETHON: Libcurl initializedSSL certificate problem: unable to get local issuer certificateI see, of course you have to have the latest ca-cert-bundle.crt, oh and don’t forget to set the environment variables:CURL_CA_BUNDLE=C:\Ruby\bin\ca-bundle.crtSSL_CERT_FILE=C:\Ruby\bin\cacert.pemTry again:  SSL certificate problem: unable to get local issuer certificateOh right, still doesn’t work. What exactly are those environment variables doing anyway:http://www.rubydoc.info/gems/ethon/0.5.0/Ethon/Easy  The CURLOPT_CAPATH function apparently does not work in Windows due to some limitation in openssl.https://stackoverflow.com/questions/37551409/configure-curl-to-use-default-system-cert-store  OpenSSL does not support using the “CA certificate store” that Windows has on its own. If you want your curl build to use that cert store, you need to rebuild curl to use the schannel backend insteadThis could be the end of the adventure, we could either download the OpenSSL source and rebuild on windows with WinSSL or find someone who has already built libcurl with WinSSL. Wait a minute, what’s this:https://skanthak.homepage.t-online.de/curl.html  X:&gt; i386\curl.exe -V  curl 7.58.0 (i386-pc-win32) libcurl/7.58.0 WinSSL zlib/1.2.11Finally, 2 days later and I have a functioning jekyll setup on windows 10 with libcurl and jekyll-remote-theme. That was really fun 🤮.">
+    <meta itemprop="datePublished" content="2018-02-25T07:54:00-06:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Down the rabbit hole
+</h1>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <p>“Just setup jekyll on your local windows 10 machine” they said, how hard can it be?</p>
+
+<p>You’ve installed ruby, then jekyll. Created a site, found a theme, installed some gems, bundled something and now you have some html served up on port 4000. But wait a minute, now your console is full of warnings:</p>
+
+<h3 id="sass-40-deprecated-function-call">Sass 4.0 deprecated function call</h3>
+
+<blockquote>
+  <p>DEPRECATION WARNING: Passing a string to call() is deprecated and will be illegal in Sass 4.0. Use call(get-function(“mixin-exists”)) instead.</p>
+</blockquote>
+
+<p>Ok, that should be easily fixed, just update the theme:</p>
+
+<blockquote>
+  <p>RUNTIME DEPENDENCIES (7):</p>
+
+  <p>jekyll ~&gt; 3.6</p>
+</blockquote>
+
+<p>Oh right, you’re running jekyll 3.5, time to upgrade! You better use ridk, and where’s msys2:</p>
+
+<blockquote>
+  <p>MSYS2 could not be found.</p>
+
+  <p>Please download and install MSYS2 from https://msys2.github.io/</p>
+</blockquote>
+
+<p>Fine, I’ll just install msys2:</p>
+
+<blockquote>
+  <p>:: msys2-runtime and catgets are in conflict. Remove catgets? [y/N]</p>
+</blockquote>
+
+<p>Ah of course, the old catgets, who invited you to the party anyway.</p>
+
+<blockquote>
+  <p>Dependency Error: Yikes! It looks like you don’t have jekyll-remote-theme or one of its dependencies installed. In order to use Jekyll as currently configured , you’ll need to install this gem. The full error message from Ruby is: ‘Could n ot open library ‘libcurl’: (illegal characters) . Could not open libr ary ‘libcurl.dll’: (illegal characters) . Could not open library ‘lib curl.so.4’: (illegal characters) . Could not open library ‘libcurl.so .4.dll’: (illegal characters) ‘ If you run into trouble, you can find helpful resources at https://jekyllrb.com/help/!</p>
+</blockquote>
+
+<figure class="highlight"><pre><code class="language-markdown" data-lang="markdown">gem install jekyll-remote-theme
+make "DESTDIR=" clean
+'make' is not recognized as an internal or external command, operable program or batch file.</code></pre></figure>
+
+<p>Oh now we’re onto a whole new world of pain. So now I’m fiddling around with pacman, on msys2, updating gcc toolchains… Right, let’s get back to the job at hand and install libcurl:</p>
+
+<figure class="highlight"><pre><code class="language-markdown" data-lang="markdown">gem install curb -- --with-curl-lib="C:/curl-7.27.0-devel-mingw32/bin" --with-curl-include="C:/curl-7.27.0-devel-mingw32/include"
+This could take a while...
+ERROR: Error installing curb:
+Can't find libcurl or curl/curl.h (RuntimeError)</code></pre></figure>
+
+<p>We’re deep in the rabbit hole now, I’ve forgotten why we started this journey in the first place 🤔. Some downloading and extracting of various libcurl builds later, oh and renaming libcurl-x64.dll to libcurl.dll. Finally curb has done something. Let’s try again:</p>
+
+<figure class="highlight"><pre><code class="language-markdown" data-lang="markdown">Remote Theme: Downloading https://codeload.github.com/mmistakes/minimal-mistakes/zip/master to C:/AppData/Local/Temp/jekyll-remote-theme-20171109-11884-1vg93xx.zip
+ETHON: Libcurl initialized
+SSL certificate problem: unable to get local issuer certificate</code></pre></figure>
+
+<p>I see, of course you have to have the latest ca-cert-bundle.crt, oh and don’t forget to set the environment variables:</p>
+
+<figure class="highlight"><pre><code class="language-markdown" data-lang="markdown">CURL_CA_BUNDLE=C:<span class="se">\R</span>uby<span class="se">\b</span>in<span class="se">\c</span>a-bundle.crt
+SSL_CERT_FILE=C:<span class="se">\R</span>uby<span class="se">\b</span>in<span class="se">\c</span>acert.pem</code></pre></figure>
+
+<p>Try again:</p>
+
+<blockquote>
+  <p>SSL certificate problem: unable to get local issuer certificate</p>
+</blockquote>
+
+<p>Oh right, still doesn’t work. What exactly are those environment variables doing anyway:</p>
+
+<p><a href="http://www.rubydoc.info/gems/ethon/0.5.0/Ethon/Easy">http://www.rubydoc.info/gems/ethon/0.5.0/Ethon/Easy</a></p>
+<blockquote>
+  <p>The CURLOPT_CAPATH function apparently does not work in Windows due to some limitation in openssl.</p>
+</blockquote>
+
+<p><a href="https://stackoverflow.com/questions/37551409/configure-curl-to-use-default-system-cert-store">https://stackoverflow.com/questions/37551409/configure-curl-to-use-default-system-cert-store</a></p>
+<blockquote>
+  <p>OpenSSL does not support using the “CA certificate store” that Windows has on its own. If you want your curl build to use that cert store, you need to rebuild curl to use the schannel backend instead</p>
+</blockquote>
+
+<p>This could be the end of the adventure, we could either download the OpenSSL source and rebuild on windows with WinSSL or find someone who has already built libcurl with WinSSL. Wait a minute, what’s this:</p>
+
+<p><a href="https://skanthak.homepage.t-online.de/curl.html">https://skanthak.homepage.t-online.de/curl.html</a></p>
+<blockquote>
+  <p>X:&gt; i386\curl.exe -V</p>
+
+  <p>curl 7.58.0 (i386-pc-win32) libcurl/7.58.0 WinSSL zlib/1.2.11</p>
+</blockquote>
+
+<p>Finally, 2 days later and I have a functioning jekyll setup on windows 10 with libcurl and jekyll-remote-theme. That was really fun 🤮.</p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/tags/#curl" class="page__taxonomy-item" rel="tag">curl</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#gcc" class="page__taxonomy-item" rel="tag">gcc</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#github-pages" class="page__taxonomy-item" rel="tag">github pages</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#jekyll-themes" class="page__taxonomy-item" rel="tag">jekyll themes</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#jekyll" class="page__taxonomy-item" rel="tag">jekyll</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#libcurl" class="page__taxonomy-item" rel="tag">libcurl</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#mingw" class="page__taxonomy-item" rel="tag">mingw</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#msys2" class="page__taxonomy-item" rel="tag">msys2</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#open-source" class="page__taxonomy-item" rel="tag">open source</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#remote-themes" class="page__taxonomy-item" rel="tag">remote themes</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#winssl" class="page__taxonomy-item" rel="tag">winssl</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/categories/#jekyll" class="page__taxonomy-item" rel="tag">jekyll</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2018-02-25T07:54:00-06:00">February 25, 2018</time></p>
+
+
+      </footer>
+
+      
+
+      
+  <nav class="pagination">
+    
+      <a href="/jekyll/welcome-to-jekyll/" class="pagination--pager" title="Jekyll up and running
+">Previous</a>
+    
+    
+      <a href="/monads/monads/" class="pagination--pager" title="Don’t fear the monad
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/powershell/remove-skype-context-menu/" rel="permalink">Remove skype context menu with powershell
+</a>
+      
+    </h2>
+    
+    <p class="archive__item-excerpt" itemprop="description">Although powershell is enabled by default when installing Windows Terminal, it seems the development team have overlooked the scenario where you want to run ...</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/jekyll/docker-plus-jekyll-equals-win/" rel="permalink">Docker plus Jekyll equals win
+</a>
+      
+    </h2>
+    
+    <p class="archive__item-excerpt" itemprop="description">I’ve started to spend more time looking at docker. A useful excerise has been to use the docker jekyll image to setup a working development environment.
+
+Pre...</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/monads/monads/" rel="permalink">Don’t fear the monad
+</a>
+      
+    </h2>
+    
+    <p class="archive__item-excerpt" itemprop="description">A bunch of useful links covering monads in F# and C#.
+
+Videos
+
+What is a Monad?
+
+
+
+
+Brian Beckman - Don’t fear the Monad
+
+
+
+
+Links
+
+https://blogs.msdn.micros...</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/jekyll/welcome-to-jekyll/" rel="permalink">Jekyll up and running
+</a>
+      
+    </h2>
+    
+    <p class="archive__item-excerpt" itemprop="description">Jekyll is a tool to create static web pages generated from markdown files. This means you don’t have to worry about paying for wordpress hosting, or worse se...</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+
+    <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2020 wilsoncg.net. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+
+  
+    <script src="/assets/js/randomize.js"></script>
+  
+
+
+
+  </body>
+</html>

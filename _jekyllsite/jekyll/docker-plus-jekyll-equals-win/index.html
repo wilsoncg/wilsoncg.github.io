@@ -1,0 +1,563 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.19.3 by Michael Rose
+  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="en" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Docker plus Jekyll equals win - wilsoncg.net</title>
+<meta name="description" content="I’ve started to spend more time looking at docker. A useful excerise has been to use the docker jekyll image to setup a working development environment.  Previously, it took me 2 days of configuring my windows 10 desktop with:    Correct version of Ruby installed   Ruby gems installed &amp; configured correctly   Make installed (in the event you need to modify &amp; rebuild some part of the toolchain)   Appropriate version of libcurl installed &amp; setup   At any point in the setup process you will encounter an error, attempt to use google to get more context, scroll through various github issues &amp; stackoverflow posts, and then try various combinations of command line arguments until each error is resolved.  Fast forward 6 months, a new OS update is applied which uknowingly touches one of those components and the whole stack of cards comes crashing down. In the software development world we are all too familiar with yak shaving.  Fortunately this problem has been solved. By using automation and the docker toolchain, the process now becomes a 2 hour task:    Install docker   Learn docker   Run 2 docker commands   Start developing   You could argue learning docker is yet more yak shaving, but the benefit to this learning, is that docker becomes another tool in the toolbox which can hugely shorten the software development and delivery lifecycle.">
+
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="wilsoncg.net">
+<meta property="og:title" content="Docker plus Jekyll equals win">
+<meta property="og:url" content="http://0.0.0.0:4000/jekyll/docker-plus-jekyll-equals-win/">
+
+
+  <meta property="og:description" content="I’ve started to spend more time looking at docker. A useful excerise has been to use the docker jekyll image to setup a working development environment.  Previously, it took me 2 days of configuring my windows 10 desktop with:    Correct version of Ruby installed   Ruby gems installed &amp; configured correctly   Make installed (in the event you need to modify &amp; rebuild some part of the toolchain)   Appropriate version of libcurl installed &amp; setup   At any point in the setup process you will encounter an error, attempt to use google to get more context, scroll through various github issues &amp; stackoverflow posts, and then try various combinations of command line arguments until each error is resolved.  Fast forward 6 months, a new OS update is applied which uknowingly touches one of those components and the whole stack of cards comes crashing down. In the software development world we are all too familiar with yak shaving.  Fortunately this problem has been solved. By using automation and the docker toolchain, the process now becomes a 2 hour task:    Install docker   Learn docker   Run 2 docker commands   Start developing   You could argue learning docker is yet more yak shaving, but the benefit to this learning, is that docker becomes another tool in the toolbox which can hugely shorten the software development and delivery lifecycle.">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2020-02-26T05:00:00-06:00">
+
+
+
+
+
+
+<link rel="canonical" href="http://0.0.0.0:4000/jekyll/docker-plus-jekyll-equals-win/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": null,
+      "url": "http://0.0.0.0:4000/"
+    
+  }
+</script>
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="wilsoncg.net Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<!-- end custom head snippets -->
+
+  </head>
+
+  <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+          <a class="site-logo" href="/"><img src="/assets/nikita_golubev_computer.svg" alt=""></a>
+        
+        <a class="site-title" href="/">
+          wilsoncg.net
+          
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/projects/">Projects</a>
+            </li><li class="masthead__menu-item">
+              <a href="/posts/">Posts</a>
+            </li></ul>
+        
+        <button class="search__toggle" type="button">
+          <span class="visually-hidden">Toggle search</span>
+          <svg class="icon" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 15.99 16">
+            <path d="M15.5,13.12L13.19,10.8a1.69,1.69,0,0,0-1.28-.55l-0.06-.06A6.5,6.5,0,0,0,5.77,0,6.5,6.5,0,0,0,2.46,11.59a6.47,6.47,0,0,0,7.74.26l0.05,0.05a1.65,1.65,0,0,0,.5,1.24l2.38,2.38A1.68,1.68,0,0,0,15.5,13.12ZM6.4,2A4.41,4.41,0,1,1,2,6.4,4.43,4.43,0,0,1,6.4,2Z" transform="translate(-.01)"></path>
+          </svg>
+        </button>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+  
+    
+
+
+
+<nav class="breadcrumbs">
+  <ol itemscope itemtype="https://schema.org/BreadcrumbList">
+    
+    
+    
+      
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+          <a href="http://0.0.0.0:4000/" itemprop="item"><span itemprop="name">Home</span></a>
+          <meta itemprop="position" content="1" />
+        </li>
+        <span class="sep">/</span>
+      
+      
+        
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+          <a href="/categories/#jekyll" itemprop="item"><span itemprop="name">Jekyll</span></a>
+          <meta itemprop="position" content="2" />
+        </li>
+        <span class="sep">/</span>
+      
+    
+      
+      
+        <li class="current">Docker plus Jekyll equals win</li>
+      
+    
+  </ol>
+</nav>
+
+  
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name"></h3>
+    
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Follow</button>
+    <ul class="author__urls social-icons">
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Docker plus Jekyll equals win">
+    <meta itemprop="description" content="I’ve started to spend more time looking at docker. A useful excerise has been to use the docker jekyll image to setup a working development environment.Previously, it took me 2 days of configuring my windows 10 desktop with:  Correct version of Ruby installed  Ruby gems installed &amp; configured correctly  Make installed (in the event you need to modify &amp; rebuild some part of the toolchain)  Appropriate version of libcurl installed &amp; setupAt any point in the setup process you will encounter an error, attempt to use google to get more context, scroll through various github issues &amp; stackoverflow posts, and then try various combinations of command line arguments until each error is resolved.Fast forward 6 months, a new OS update is applied which uknowingly touches one of those components and the whole stack of cards comes crashing down. In the software development world we are all too familiar with yak shaving.Fortunately this problem has been solved. By using automation and the docker toolchain, the process now becomes a 2 hour task:  Install docker  Learn docker  Run 2 docker commands  Start developingYou could argue learning docker is yet more yak shaving, but the benefit to this learning, is that docker becomes another tool in the toolbox which can hugely shorten the software development and delivery lifecycle.">
+    <meta itemprop="datePublished" content="2020-02-26T05:00:00-06:00">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Docker plus Jekyll equals win
+</h1>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <p>I’ve started to spend more time looking at docker. A useful excerise has been to use the docker jekyll image to setup a working development environment.</p>
+
+<p><a href="/jekyll/down-the-rabbit-hole/">Previously</a>, it took me 2 days of configuring my windows 10 desktop with:</p>
+<ul>
+  <li>Correct version of Ruby installed</li>
+  <li>Ruby gems installed &amp; configured correctly</li>
+  <li>Make installed (in the event you need to modify &amp; rebuild some part of the toolchain)</li>
+  <li>Appropriate version of libcurl installed &amp; setup</li>
+</ul>
+
+<p>At any point in the setup process you will encounter an error, attempt to use google to get more context, scroll through various github issues &amp; stackoverflow posts, and then try various combinations of command line arguments until each error is resolved.</p>
+
+<p>Fast forward 6 months, a new OS update is applied which uknowingly touches one of those components and the whole stack of cards comes crashing down. In the software development world we are all too familiar with <a href="https://en.wiktionary.org/wiki/yak_shaving">yak shaving</a>.</p>
+
+<p>Fortunately this problem has been solved. By using automation and the <a href="https://ddewaele.github.io/running-jekyll-in-docker/">docker toolchain</a>, the process now becomes a 2 hour task:</p>
+<ul>
+  <li>Install docker</li>
+  <li>Learn docker</li>
+  <li>Run 2 docker commands</li>
+  <li>Start developing</li>
+</ul>
+
+<p>You could argue learning docker is yet more yak shaving, but the benefit to this learning, is that docker becomes another tool in the toolbox which can hugely shorten the software development and delivery lifecycle.</p>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/tags/#docker" class="page__taxonomy-item" rel="tag">docker</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#github-pages" class="page__taxonomy-item" rel="tag">github pages</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/#jekyll" class="page__taxonomy-item" rel="tag">jekyll</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categories: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/categories/#jekyll" class="page__taxonomy-item" rel="tag">jekyll</a>
+    
+    </span>
+  </p>
+
+
+        
+  <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Updated:</strong> <time datetime="2020-02-26T05:00:00-06:00">February 26, 2020</time></p>
+
+
+      </footer>
+
+      
+
+      
+  <nav class="pagination">
+    
+      <a href="/monads/monads/" class="pagination--pager" title="Don’t fear the monad
+">Previous</a>
+    
+    
+      <a href="/powershell/remove-skype-context-menu/" class="pagination--pager" title="Remove skype context menu with powershell
+">Next</a>
+    
+  </nav>
+
+    </div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">You May Also Enjoy</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/powershell/remove-skype-context-menu/" rel="permalink">Remove skype context menu with powershell
+</a>
+      
+    </h2>
+    
+    <p class="archive__item-excerpt" itemprop="description">Although powershell is enabled by default when installing Windows Terminal, it seems the development team have overlooked the scenario where you want to run ...</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/monads/monads/" rel="permalink">Don’t fear the monad
+</a>
+      
+    </h2>
+    
+    <p class="archive__item-excerpt" itemprop="description">A bunch of useful links covering monads in F# and C#.
+
+Videos
+
+What is a Monad?
+
+
+
+
+Brian Beckman - Don’t fear the Monad
+
+
+
+
+Links
+
+https://blogs.msdn.micros...</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/jekyll/down-the-rabbit-hole/" rel="permalink">Down the rabbit hole
+</a>
+      
+    </h2>
+    
+    <p class="archive__item-excerpt" itemprop="description">“Just setup jekyll on your local windows 10 machine” they said, how hard can it be?
+
+You’ve installed ruby, then jekyll. Created a site, found a theme, insta...</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title no_toc" itemprop="headline">
+      
+        <a href="/jekyll/welcome-to-jekyll/" rel="permalink">Jekyll up and running
+</a>
+      
+    </h2>
+    
+    <p class="archive__item-excerpt" itemprop="description">Jekyll is a tool to create static web pages generated from markdown files. This means you don’t have to worry about paying for wordpress hosting, or worse se...</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+      <div class="search-content">
+        <div class="search-content__inner-wrap"><form class="search-content__form" onkeydown="return event.key != 'Enter';">
+    <label class="sr-only" for="search">
+      Enter your search term...
+    </label>
+    <input type="search" id="search" class="search-input" tabindex="-1" placeholder="Enter your search term..." />
+  </form>
+  <div id="results" class="results"></div></div>
+
+      </div>
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+
+    
+
+    <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2020 wilsoncg.net. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+
+
+
+
+<script src="/assets/js/lunr/lunr.min.js"></script>
+<script src="/assets/js/lunr/lunr-store.js"></script>
+<script src="/assets/js/lunr/lunr-en.js"></script>
+
+
+
+
+
+  
+    <script src="/assets/js/randomize.js"></script>
+  
+
+
+
+  </body>
+</html>
