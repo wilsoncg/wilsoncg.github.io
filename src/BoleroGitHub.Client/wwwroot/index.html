@@ -1,7 +1,3 @@
-@page "/"
-@namespace BoleroGitHub.Server
-@using Bolero.Server.RazorHost
-@inject IBoleroHostConfig BoleroHostConfig
 <!DOCTYPE html>
 <html>
   <head>
@@ -21,7 +17,7 @@
         </a>
       </div>
     </nav>
-    <div id="main">@(await Html.RenderComponentAsync<BoleroGitHub.Client.Main.MyApp>(BoleroHostConfig))</div>
-    @Html.RenderBoleroScript(BoleroHostConfig)
+    <div id="main">Loading...</div>
+    <script src="_framework/blazor.webassembly.js"></script>
   </body>
 </html>

@@ -24,7 +24,7 @@ type Startup() =
                 .Services
             .AddBoleroHost()
 #if DEBUG
-            .AddHotReload(templateDir = __SOURCE_DIRECTORY__ + "/../bolerothrowaway.Client")
+            .AddHotReload(templateDir = __SOURCE_DIRECTORY__ + "/../BoleroGitHub.Client")
 #endif
         |> ignore
 
