@@ -1,4 +1,10 @@
 _site
 .sass-cache
 .jekyll-metadata
+bin/
+obj/
 .vs
+*.csproj.user
+*.fsproj.user
+.fake
+.ionide
