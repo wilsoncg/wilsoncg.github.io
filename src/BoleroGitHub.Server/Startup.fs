@@ -4,6 +4,7 @@ open Microsoft.AspNetCore
 open Microsoft.AspNetCore.Authentication.Cookies
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
+open Microsoft.AspNetCore.Mvc
 open Microsoft.Extensions.DependencyInjection
 open Bolero
 open Bolero.Remoting.Server
@@ -15,7 +16,10 @@ type Startup() =
     // This method gets called by the runtime. Use this method to add services to the container.
     // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
     member this.ConfigureServices(services: IServiceCollection) =
-        services.AddMvc().AddRazorRuntimeCompilation() |> ignore
+        services.AddMvc()
+         .AddRazorRuntimeCompilation()
+         .AddRazorPagesOptions(fun o -> 
+            o.Conventions.ConfigureFilter(IgnoreAntiforgeryTokenAttribute()) |> ignore) |> ignore
         services.AddServerSideBlazor() |> ignore
         services
             .AddAuthorization()
@@ -33,9 +37,9 @@ type Startup() =
         app
             .UseAuthentication()
             .UseRemoting()
-            .UseStaticFiles()
-            .UseRouting()
+            .UseStaticFiles()            
             .UseBlazorFrameworkFiles()
+            .UseRouting()
             .UseEndpoints(fun endpoints ->
 #if DEBUG
                 endpoints.UseHotReload()
