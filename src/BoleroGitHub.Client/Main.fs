@@ -10,6 +10,8 @@ open Bolero.Templating.Client
 /// Routing endpoints definition.
 type Page =
     | [<EndPoint "/">] Home
+    | [<EndPoint "/posts">] Posts 
+    | [<EndPoint "/projects">] Projects    
 
 /// The Elmish application's model.
 type Model =
@@ -42,7 +44,7 @@ let update message model =
 /// Connects the routing system to the Elmish application.
 let router = Router.infer SetPage (fun model -> model.page)
 
-type Main = Template<"wwwroot/main.html">
+type Main = Template<"wwwroot/templateMainMinimal.html">
 
 let homePage model dispatch =
     Main.Home().Elt()
