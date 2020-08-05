@@ -13,22 +13,26 @@ type Page =
     | [<EndPoint "/posts">] Posts 
     | [<EndPoint "/projects">] Projects    
 
+type Toggle = On | Off
 /// The Elmish application's model.
 type Model =
     {
         page: Page
+        searchToggle: Toggle
         error: string option
     }
 
 let initModel =
     {
-        page = Home        
+        page = Home
+        searchToggle = Off   
         error = None
     }
 
 /// The Elmish application's update messages.
 type Message =
-    | SetPage of Page  
+    | SetPage of Page
+    | SearchToggle of Toggle
     | Error of exn
     | ClearError
 
@@ -36,6 +40,8 @@ let update message model =
     match message with
     | SetPage page ->
         { model with page = page }, Cmd.none
+    | SearchToggle toggle ->
+        { model with searchToggle = if toggle = On then Off else On }, Cmd.none
     | Error exn ->
         { model with error = Some exn.Message }, Cmd.none
     | ClearError ->
@@ -47,7 +53,12 @@ let router = Router.infer SetPage (fun model -> model.page)
 type Main = Template<"wwwroot/templateMainMinimal.html">
 
 let homePage model dispatch =
-    Main.Home().Elt()
+  let splashImages = [ "splash-murcia.jpg"; "splash-blue-min.png"; "splash-retro-car.jpg" ]
+  let r = Random().Next(splashImages.Length)
+  Main
+    .Home()
+    .SplashImage(splashImages.[r])
+    .Elt()
 
 let menuItem (model: Model) (page: Page) (text: string) =
     Main.MenuItem()
@@ -59,21 +70,20 @@ let menuItem (model: Model) (page: Page) (text: string) =
 let view model dispatch =
     Main()
         .Menu(concat [
-            menuItem model Home "Home"
+            menuItem model Home "Home";
+            menuItem model Projects "Projects";
+            menuItem model Posts "Posts";
         ])
+        .SearchToggle(fun _ -> dispatch (SearchToggle model.searchToggle))
+        .ContentIsVisible(if model.searchToggle = On then "is--hidden" else "")
+        .SearchIsVisible(if model.searchToggle = On then "is--visible" else "")
         .Body(
             cond model.page <| function
             | Home -> homePage model dispatch
+            | Posts -> Text("Not Implemented")
+            | Projects -> Text("Not Implemented")
         )
-        .Error(
-            cond model.error <| function
-            | None -> empty
-            | Some err ->
-                Main.ErrorNotification()
-                    .Text(err)
-                    .Hide(fun _ -> dispatch ClearError)
-                    .Elt()
-        )
+        .Year(DateTime.UtcNow.Year |> string |> text)
         .Elt()
 
 type MyApp() =
