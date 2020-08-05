@@ -19,13 +19,15 @@ type Model =
     {
         page: Page
         searchToggle: Toggle
+        searchTerm: string
         error: string option
     }
 
 let initModel =
     {
         page = Home
-        searchToggle = Off   
+        searchToggle = Off
+        searchTerm = ""
         error = None
     }
 
@@ -33,6 +35,7 @@ let initModel =
 type Message =
     | SetPage of Page
     | SearchToggle of Toggle
+    | SearchTerm of string
     | Error of exn
     | ClearError
 
@@ -42,6 +45,8 @@ let update message model =
         { model with page = page }, Cmd.none
     | SearchToggle toggle ->
         { model with searchToggle = if toggle = On then Off else On }, Cmd.none
+    | SearchTerm term ->
+        { model with searchTerm = term}, Cmd.none
     | Error exn ->
         { model with error = Some exn.Message }, Cmd.none
     | ClearError ->
@@ -75,6 +80,7 @@ let view model dispatch =
             menuItem model Posts "Posts";
         ])
         .SearchToggle(fun _ -> dispatch (SearchToggle model.searchToggle))
+        .SearchTerm(model.searchTerm, fun s -> dispatch(SearchTerm s))
         .ContentIsVisible(if model.searchToggle = On then "is--hidden" else "")
         .SearchIsVisible(if model.searchToggle = On then "is--visible" else "")
         .Body(
