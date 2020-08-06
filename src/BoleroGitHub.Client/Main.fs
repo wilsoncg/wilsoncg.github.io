@@ -72,6 +72,9 @@ let menuItem (model: Model) (page: Page) (text: string) =
         .Text(text)
         .Elt()
 
+let projectsPage model dispatch =
+    Main.Projects().Elt()
+
 let view model dispatch =
     Main()
         .Menu(concat [
@@ -87,7 +90,7 @@ let view model dispatch =
             cond model.page <| function
             | Home -> homePage model dispatch
             | Posts -> Text("Not Implemented")
-            | Projects -> Text("Not Implemented")
+            | Projects -> projectsPage model dispatch
         )
         .Year(DateTime.UtcNow.Year |> string |> text)
         .Elt()
@@ -99,5 +102,6 @@ type MyApp() =
         Program.mkProgram (fun _ -> initModel, Cmd.ofMsg(SetPage Home)) update view
         |> Program.withRouter router
 #if DEBUG
+        |> Program.withConsoleTrace
         |> Program.withHotReload
 #endif
