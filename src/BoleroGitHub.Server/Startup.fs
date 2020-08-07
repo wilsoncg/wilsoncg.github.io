@@ -24,7 +24,9 @@ type Startup() =
     // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
     member this.ConfigureServices(services: IServiceCollection) =
         services.AddControllers() |> ignore         
-        services.AddHotReload(templateDir = clientProjPath)
+        services.AddHotReload(
+            templateDir = clientProjPath, 
+            delay = System.TimeSpan.FromMilliseconds 1000.)
         |> ignore
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -40,7 +42,7 @@ type Startup() =
             .UseRouting()       
             .UseBlazorFrameworkFiles()
             .UseEndpoints(fun endpoints ->
-                endpoints.UseHotReload()
+                endpoints.UseHotReload() |> ignore
                 endpoints.MapControllers() |> ignore
                 endpoints.MapFallbackToFile("index.html") |> ignore)
         |> ignore
