@@ -11,7 +11,8 @@
     <BlazorWebAssemblyPreserveCollationData>false</BlazorWebAssemblyPreserveCollationData>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Main.fs" />
+    <Compile Include="Main.fs" />    
+    <Compile Include="Markdown.fs" />
     <Compile Include="Startup.fs" />
   </ItemGroup>
   <ItemGroup>
@@ -20,5 +21,7 @@
     <PackageReference Include="Bolero.HotReload" Version="0.*" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Build" Version="3.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="3.2.*" />
+    <PackageReference Include="Markdig" Version="0.20.0" />
+    <PackageReference Include="YamlDotNet" Version="8.1.2" />
   </ItemGroup>
 </Project>
