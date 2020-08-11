@@ -24,4 +24,18 @@
     <PackageReference Include="Markdig" Version="0.20.0" />
     <PackageReference Include="Legivel" Version="0.4.3" />
   </ItemGroup>
+  <Target Name="GenerateIndexJsonForPostsFolder">
+    <ItemGroup>
+      <_MarkdownPosts Include="$(_BlazorCurrentProjectWWWroot)\posts\**\*.md" />
+      <_MarkdownPostsRelative Include="@(_MarkdownPosts->'posts/%(Filename)%(Extension)')" />
+    </ItemGroup>
+    <WriteLinesToFile
+            File="$(_BlazorCurrentProjectWWWroot)\posts\index.txt"
+            Lines="@(_MarkdownPostsRelative)"
+            Overwrite="true"
+            Encoding="Unicode"/>
+  </Target>
+  <PropertyGroup>
+    <_BlazorCopyFilesToOutputDirectoryDependsOn>$(_BlazorCopyFilesToOutputDirectoryDependsOn);GenerateIndexJsonForPostsFolder</_BlazorCopyFilesToOutputDirectoryDependsOn>
+  </PropertyGroup>
 </Project>
