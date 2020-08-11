@@ -61,6 +61,8 @@ let parse markdown =
     let renderer = HtmlRenderer(sw)
     pipeline.Setup(renderer) |> ignore
     let doc = Markdown.Parse(markdown, pipeline)
+    renderer.Render(doc) |> ignore
+    sw.Flush() |> ignore
     let frontmatter =
         match doc.Descendants<YamlFrontMatterBlock>().FirstOrDefault() with
         | null -> None
@@ -70,6 +72,6 @@ let parse markdown =
             parsed |> Some
     {
         FrontMatter = frontmatter
-        Body = ""
+        Body = sw.ToString()
     }
 

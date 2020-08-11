@@ -65,7 +65,6 @@
     <article class="splash" itemscope itemtype="https://schema.org/CreativeWork">
       <section class="page__content" itemprop="text">
         
-        <template id="ProjectsIntro" >
         <div class="feature__wrapper">
           <div class="feature__item--center">
             <div class="archive__item">
@@ -78,11 +77,10 @@
             </div>
           </div>
         </div>
-        </template>
-
+        
+        <div class="feature__wrapper">
         ${ProjectsList}
         <template id="ProjectsItem">
-        <div class="feature__wrapper">
           <div class="feature__item">
             <div class="archive__item">        
                 <div class="archive__item-teaser">
@@ -93,13 +91,14 @@
                 <div class="archive__item-excerpt">
                 <p>${excerpt}</p>
                 </div>
-                  <p><a href="${url}" class="${buttonClass}">${buttonLabel}</a></p>
+                  <p><a href="${url}" class="btn ${buttonClass}">${buttonLabel}</a></p>
               </div>
             </div>
           </div>
-        </div>
-      </template>
+      </template>      
+      </div>
 
+      ${Body}
       </section>
     </article>
   </div>

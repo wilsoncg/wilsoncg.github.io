@@ -112,22 +112,19 @@ let private showProject (project: FeatureRowContent) =
         .buttonLabel(project.buttonLabel)
         .Elt()
 
-let private listProjects (projects: FeatureRowContent list) =
+let private listProjects (projects: ProjectsFrontMatter) (body:string) =
     Main
         .Projects()
-        .ProjectsList(forEach projects showProject)
+        .title(projects.Intro.Head.title)
+        .excerpt(projects.Intro.Head.excerpt)
+        .ProjectsList(forEach projects.FeatureRow showProject)
+        .Body(RawHtml body)
         .Elt()
 
 let projectsPage (model:Model) dispatch =
-    let s = model.markdowns.["projects"]
-    // let p = 
-    //     s.FrontMatter
-    //     |> function 
-    //      | Some fm -> listProjects fm.FeatureRow
-    //      | None _ -> div [] []
-    // p
-    cond s.FrontMatter.IsSome <| function 
-        | true -> listProjects s.FrontMatter.Value.FeatureRow
+    let r = model.markdowns.["projects"]
+    cond r.FrontMatter.IsSome <| function 
+        | true -> listProjects r.FrontMatter.Value r.Body
         | false -> empty
 
 let view model dispatch =
