@@ -14,15 +14,17 @@ open System.Collections.Generic
 /// Routing endpoints definition.
 type Page =
     | [<EndPoint "/">] Home
-    | [<EndPoint "/posts">] Posts 
-    | [<EndPoint "/projects">] Projects    
+    | [<EndPoint "/posts">] Posts
+    | [<EndPoint "/post/{postTitle}">] Post of postTitle: string
+    | [<EndPoint "/projects">] Projects
 
 type Toggle = On | Off
+type PageState = Loading | Loaded
 /// The Elmish application's model.
 type Model =
     {
         page: Page
-        markdowns: Dictionary<string, Rendered>
+        markdowns: Map<string, Rendered>
         searchToggle: Toggle
         searchTerm: string
         error: string option
@@ -31,7 +33,7 @@ type Model =
 let initModel =
     {
         page = Home
-        markdowns = Dictionary<string, Rendered>() 
+        markdowns = Map.empty
         searchToggle = Off
         searchTerm = ""
         error = None
@@ -39,8 +41,8 @@ let initModel =
 
 /// The Elmish application's update messages.
 type Message =
-    | Initialize
-    | GotMarkdown of Dictionary<string, Rendered>
+    | LoadingPage of Page
+    | GotMarkdown of Page * Rendered
     | SetPage of Page
     | SearchToggle of Toggle
     | SearchTerm of string
@@ -58,20 +60,23 @@ let getProjectsMd hc =
     async {
         let! markdown = getAsync hc "/pages/projects.md" 
         let parsed = Markdown.parse markdown
-        let d = Dictionary<string, Rendered>()
-        d.Add("projects", parsed)
-        return d
+        return (Projects, parsed)
     }
 
 let update httpClient message model =
+    let preLoadProjects = Cmd.ofAsync getProjectsMd httpClient GotMarkdown Error
     match message with
-    | Initialize ->
-        model, 
-        Cmd.ofAsync getProjectsMd httpClient GotMarkdown Error
-    | GotMarkdown dictionary ->
-        { model with markdowns = dictionary}, Cmd.ofMsg (SetPage Home)
     | SetPage page ->
-        { model with page = page }, Cmd.none
+        { model with page = page },
+        match page with
+        | Home -> Cmd.none
+        | Projects -> Cmd.ofMsg (LoadingPage Projects)
+        | _ -> Cmd.none
+    | LoadingPage page ->
+        model, preLoadProjects
+    | GotMarkdown (p,md) ->
+        let m = Map.add "projects" md model.markdowns
+        { model with markdowns = m }, Cmd.none 
     | SearchToggle toggle ->
         { model with searchToggle = if toggle = On then Off else On }, Cmd.none
     | SearchTerm term ->
@@ -122,10 +127,17 @@ let private listProjects (projects: ProjectsFrontMatter) (body:string) =
         .Elt()
 
 let projectsPage (model:Model) dispatch =
-    let r = model.markdowns.["projects"]
-    cond r.FrontMatter.IsSome <| function 
-        | true -> listProjects r.FrontMatter.Value r.Body
+    let markdownFetched = Map.exists (fun k v -> k = "projects") model.markdowns 
+    cond (markdownFetched && model.markdowns.["projects"].FrontMatter.IsSome) <| function  
+        | true -> listProjects model.markdowns.["projects"].FrontMatter.Value model.markdowns.["projects"].Body
         | false -> empty
+
+let textInMain t =
+    div [ attr.id "main-content" ; "role" => "main" ] [
+        div [ attr.``class`` "archive" ] [
+            text t
+        ]
+    ]
 
 let view model dispatch =
     Main()
@@ -141,8 +153,9 @@ let view model dispatch =
         .Body(
             cond model.page <| function
             | Home -> homePage model dispatch
-            | Posts -> Text("Not Implemented")
             | Projects -> projectsPage model dispatch
+            //| LoadingPage -> textInMain "Loading..."         
+            | _ -> textInMain "Not Implemented"
         )
         .Year(DateTime.UtcNow.Year |> string |> text)
         .Elt()
@@ -154,7 +167,7 @@ type MyApp() =
         let hc = this.Services.GetService(typeof<HttpClient>) :?> HttpClient
         Program.mkProgram (fun _ -> 
             initModel, 
-            Cmd.ofMsg(Initialize)) (update hc) view
+            Cmd.ofMsg(SetPage Home)) (update hc) view
         |> Program.withRouter router
 #if DEBUG
         |> Program.withConsoleTrace
