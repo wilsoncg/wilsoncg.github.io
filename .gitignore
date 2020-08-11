@@ -8,3 +8,4 @@ obj/
 *.fsproj.user
 .fake
 .ionide
+**/posts/index.txt
