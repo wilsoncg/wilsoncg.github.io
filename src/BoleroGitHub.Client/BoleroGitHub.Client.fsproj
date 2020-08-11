@@ -10,9 +10,9 @@
     <BlazorEnableTimeZoneSupport>false</BlazorEnableTimeZoneSupport>
     <BlazorWebAssemblyPreserveCollationData>false</BlazorWebAssemblyPreserveCollationData>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="Main.fs" />    
+  <ItemGroup>    
     <Compile Include="Markdown.fs" />
+    <Compile Include="Main.fs" />
     <Compile Include="Startup.fs" />
   </ItemGroup>
   <ItemGroup>

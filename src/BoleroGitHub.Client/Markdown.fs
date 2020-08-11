@@ -43,9 +43,17 @@ type ProjectsFrontMatter =
 
 type Rendered =
     {
-        FrontMatter: Option<string>
+        FrontMatter: Option<ProjectsFrontMatter>
         Body: string
     }
+
+let parseFrontMatter (fm:string) =
+    let r = Deserialize<ProjectsFrontMatter> fm
+    r 
+    |> List.head
+    |> function
+        | Success s -> s.Data
+        | Error e -> e.ToString() |> sprintf "Deserialize failure: %s" |> failwith
 
 let parse markdown = 
     let pipeline = MarkdownPipelineBuilder().UseYamlFrontMatter().Build()
@@ -57,22 +65,11 @@ let parse markdown =
         match doc.Descendants<YamlFrontMatterBlock>().FirstOrDefault() with
         | null -> None
         | yaml -> 
-            let y = markdown.Substring(yaml.Span.Start, yaml.Span.Length) 
-            y |> Some
+            let y = markdown.Substring(yaml.Span.Start, yaml.Span.Length)
+            let parsed = parseFrontMatter y
+            parsed |> Some
     {
         FrontMatter = frontmatter
         Body = ""
     }
 
-let parseFrontMatter (fm:string) =
-    let r = Deserialize<ProjectsFrontMatter> fm
-    r 
-    |> List.head
-    |> function
-        | Success s -> s.Data
-        | Error e -> e.ToString() |> sprintf "Deserialize failure: %s" |> failwith
-    //DeserializerBuilder()
-     //.WithAttributeOverride(fun (p:ProjectsFrontMatter) -> p.layout = "", new YamlIgnoreAttribute())
-     //.Build()
-     //.Deserialize<ProjectsFrontMatter>(md)
-    //{ FeatureRows = [] }
