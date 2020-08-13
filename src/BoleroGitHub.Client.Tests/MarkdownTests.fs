@@ -80,7 +80,7 @@ intro:
 type testDate = {| date: DateTime |}
 [<Fact>]
 let ``Parse date`` () =
-  let s = """date:  2017-07-09 16:36:51 +0100"""
+  let s = """date:  2017-07-09 16:36:51 +01:00"""
   let actual = Deserialize<testDate> s |> dataFromDeserializeResult
 
   Assert.Equal(2017, actual.date.Year)
@@ -90,7 +90,7 @@ let ``Parse date`` () =
 [<Literal>]
 let PostFrontMatter =
   """title:  "Jekyll up and running"
-date:   2017-07-09 16:36:51 +0100
+date:   2017-07-09 16:36:51 +01:00
 categories: jekyll
 tags: 
   - jekyll

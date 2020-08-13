@@ -22,7 +22,7 @@ type Toggle = On | Off
 type LoadState = 
  | Loading 
  | Loaded
- 
+
 /// The Elmish application's model.
 type Model =
     {
@@ -94,7 +94,11 @@ let update httpClient message model =
         Cmd.ofAsync (fun hc -> 
             async { 
                 let! s = getAsync hc "posts/index.txt" 
-                return s.Split Environment.NewLine |> Array.toList
+                let split = 
+                    s.Trim([| '\r'; '\n' |])
+                    |> fun s -> s.Split Environment.NewLine
+                    |> Array.toList
+                return split
             }) httpClient GotPostIndex Error
     let preLoadPosts posts =
         Cmd.ofAsync getPosts (posts, httpClient) GotPosts Error
@@ -203,16 +207,6 @@ let postsPage (model:Model) =
             | FrontMatter.Post p -> Some p
             | _ -> None)
         |> List.choose id 
-        // |> List.map (Option.bind (fun fm ->
-        //     match fm with
-        //     | FrontMatter.Post p -> showPostSummary p
-        //     | _ -> empty))
-        // |> function
-        //     | Some fm ->
-        //         match fm with
-        //         | FrontMatter.Post p -> [p]
-        //         | _ -> []
-        //     | None -> [])
     Main
         .Posts()
         .PostsList(forEach p showPostSummary)
@@ -230,12 +224,17 @@ let view model dispatch =
         .ContentIsVisible(if model.searchToggle = On then "is--hidden" else "")
         .SearchIsVisible(if model.searchToggle = On then "is--visible" else "")
         .Body(
-            cond (model.loadState, model.page) <| function
-            | Loading, _ -> textInMain "Loading..."
-            | _, Home -> homePage model dispatch
-            | _, Projects -> projectsPage model
-            | _, Posts -> postsPage model      
-            | _,_ -> textInMain "Not Implemented"
+            cond model.page <| function
+            | Home -> homePage model dispatch
+            | Projects -> projectsPage model
+            | Posts -> postsPage model      
+            | _ -> textInMain "Not Implemented"
+            // cond (model.loadState, model.page) <| function
+            // | Loading, _ -> textInMain "Loading..."
+            // | _, Home -> homePage model dispatch
+            // | _, Projects -> projectsPage model
+            // | _, Posts -> postsPage model      
+            // | _,_ -> textInMain "Not Implemented"
         )
         .Year(DateTime.UtcNow.Year |> string |> text)
         .Elt()
