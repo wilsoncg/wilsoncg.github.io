@@ -65,26 +65,29 @@ let getAsync (client:HttpClient) (url:string) =
         let! response = client.GetAsync(url) |> Async.AwaitTask
         response.EnsureSuccessStatusCode() |> ignore
         let! content = response.Content.ReadAsStringAsync() |> Async.AwaitTask
-        return content
+        return (content, url)
     }
 let getProjectsMd hc = 
     async {
-        let! markdown = getAsync hc "/pages/projects.md" 
+        let! (markdown, _) = getAsync hc "/pages/projects.md" 
         let parsed = Markdown.parse markdown PageType.Projects
         return (Projects, parsed)
     }
-let getPosts (posts, hc) =
+let getPosts (fileLocation, hc) =
+    let titleFromFileLocation (location:string) =
+        location.Replace("posts/","").Replace(".md","")
     async {
       let! markdowns =
-        posts 
+        fileLocation 
         |> List.map (fun p -> getAsync hc p)
         |> Async.Parallel
       let p = 
         markdowns 
         |> Array.toList
-        |> List.map (fun m -> 
-            let parse = Markdown.parse m PageType.Post
-            (Posts, parse))
+        |> List.map (fun (m, url) -> 
+            let parsed = Markdown.parse m PageType.Post
+            let title = titleFromFileLocation url
+            (Post title, parsed))
       return p
     }
 
@@ -93,7 +96,7 @@ let update httpClient message model =
     let getPostIndex = 
         Cmd.ofAsync (fun hc -> 
             async { 
-                let! s = getAsync hc "posts/index.txt" 
+                let! (s, _) = getAsync hc "posts/index.txt" 
                 let split = 
                     s.Trim([| '\r'; '\n' |])
                     |> fun s -> s.Split Environment.NewLine
@@ -192,21 +195,33 @@ let textInMain t =
         ]
     ]
 
-let showPostSummary (post:PostFrontMatter) =
+let showPostSummary (post:Page * Rendered) =
+    let page, rendered = post
+    let url = 
+        match page with
+        | Post p -> p
+        | _ -> ""
+    let extract (pfm:FrontMatter) =
+        match pfm with
+        | FrontMatter.Post p -> Some p
+        | _ -> None
+    let (title, date) = 
+        Option.bind extract rendered.FrontMatter
+        |> function
+            | Some fm -> (fm.title, fm.date.ToString("MM/dd/yyyy"))
+            | None -> ("","")
+
     Main.PostSummary()
-        .headline(post.title)
+        .date(date)
+        .posturl(url)
+        .headline(title)
+        .description(rendered.Summary)
         .Elt()
 
 let postsPage (model:Model) =
     let p =  
         model.posts 
-        |> List.map (fun (p,r) -> r.FrontMatter)
-        |> List.choose id
-        |> List.map (fun fm -> 
-            match fm with
-            | FrontMatter.Post p -> Some p
-            | _ -> None)
-        |> List.choose id 
+        
     Main
         .Posts()
         .PostsList(forEach p showPostSummary)

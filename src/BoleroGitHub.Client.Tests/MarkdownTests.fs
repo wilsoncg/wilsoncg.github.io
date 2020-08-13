@@ -129,4 +129,10 @@ let PostWithFrontmatter =
 let ``Parse post``() = 
   let actual = parse PostWithFrontmatter PageType.Post
 
-  Assert.True (Option.isSome actual.FrontMatter) 
+  Assert.True (Option.isSome actual.FrontMatter)
+
+[<Fact>]
+let ``Parse post for first 10 characters``() =
+  let actual = parse PostWithFrontmatter PageType.Post
+
+  Assert.Equal("Jekyll is ", actual.Summary.Substring (0,10))

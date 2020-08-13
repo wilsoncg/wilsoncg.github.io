@@ -60,6 +60,7 @@ type Rendered =
     {
         FrontMatter: Option<FrontMatter>
         Body: string
+        Summary: string
     }
 
 let private deserializeAndExtract<'t> s =
@@ -81,6 +82,9 @@ let parse markdown t =
     let renderer = HtmlRenderer(sw)
     pipeline.Setup(renderer) |> ignore
     let doc = Markdown.Parse(markdown, pipeline)
+    let summary = 
+        let plaintext = Markdown.ToPlainText(markdown, pipeline)
+        plaintext.Substring (0, (Math.Min (150, plaintext.Length)))
     renderer.Render(doc) |> ignore
     sw.Flush() |> ignore
     let frontmatter =
@@ -93,5 +97,6 @@ let parse markdown t =
     {
         FrontMatter = frontmatter
         Body = sw.ToString()
+        Summary = summary 
     }
 
