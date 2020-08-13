@@ -54,7 +54,9 @@
         <div class="feature__wrapper"></div>
         <p>Hi there, I’m Craig.</p>
         
-        <p>I’m a C#/.Net developer by day, but I like to work on other <a href="/projects/">projects</a> in my free time.</p>
+        <p>I’m a C#/.Net developer by day, but I like to work on 
+          other <a href="/projects/">projects</a> in my free time.</p>
+        <p>This site is built using F#, Bolero & Blazor, which compile to .NET Core & WebAssembly.</p>
         </section>
       </article>
     </div>
@@ -76,6 +78,33 @@
           </article>
         </div>
       </template>
+    </div>
+  </div>
+</template>
+
+<template id="Post">
+  <div id="main-content" role="main">
+    <article class="page">
+      <div class="page__inner-wrap">
+        <header>
+          <h1 id="page-title" class="page_title">${title}</h1>
+        </header>
+        <section class="page__content" itemprop="text">
+          ${Body}
+        </section>
+        <footer class="page__meta">
+          <p class="page__date">
+            <strong>
+              <i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i>
+              "Updated:"
+            </strong>
+            <time datetime="${datetime}">${shortdate}</time>
+          </p>
+        </footer>
+      </div>
+    </article>
+    <div class="archive">
+      
     </div>
   </div>
 </template>

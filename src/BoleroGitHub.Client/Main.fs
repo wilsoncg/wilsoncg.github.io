@@ -118,7 +118,7 @@ let update httpClient message model =
         match page with 
         | Projects -> loading, preLoadProjects
         | Posts -> loading, getPostIndex
-        | _ -> model, Cmd.none
+        | _ -> { model with loadState = Loaded }, Cmd.none
     | GotProjects (p,md) ->
         let m = Map.add PageType.Projects md model.markdowns
         { model with markdowns = m; loadState = Loaded }, Cmd.none
@@ -219,13 +219,42 @@ let showPostSummary (post:Page * Rendered) =
         .Elt()
 
 let postsPage (model:Model) =
-    let p =  
-        model.posts 
-        
     Main
         .Posts()
-        .PostsList(forEach p showPostSummary)
+        .PostsList(forEach model.posts showPostSummary)
         .Elt()
+
+let showPost post title =
+    let page, rendered = post
+    let extract (pfm:FrontMatter) =
+        match pfm with
+        | FrontMatter.Post p -> Some p
+        | _ -> None
+    let (title, date) = 
+        Option.bind extract rendered.FrontMatter
+        |> function
+            | Some fm -> (fm.title, fm.date)
+            | None -> ("",DateTime.UtcNow)
+    
+    Main
+        .Post()
+        .title(title)
+        .Body(RawHtml rendered.Body)
+        .datetime(date.ToString("yyyy-MM-ddTHH:mm:ssZ"))
+        .shortdate(date.ToString("d MMM, yyyy"))
+        .Elt()
+
+let postPage (model:Model) title =    
+    let matches = 
+        model.posts 
+        |> List.where (fun (p,r) -> 
+            match p with 
+            | Page.Post t -> printfn "match Post %s=%s" t title ; t = title 
+            | _ -> false)
+
+    cond matches.IsEmpty <| function
+    | true -> textInMain "No post found"
+    | false -> showPost matches.Head title
 
 let view model dispatch =
     Main()
@@ -239,17 +268,21 @@ let view model dispatch =
         .ContentIsVisible(if model.searchToggle = On then "is--hidden" else "")
         .SearchIsVisible(if model.searchToggle = On then "is--visible" else "")
         .Body(
+            cond model.loadState <| function
+            | Loading -> textInMain "Loading..."
+            | Loaded -> 
             cond model.page <| function
             | Home -> homePage model dispatch
             | Projects -> projectsPage model
-            | Posts -> postsPage model      
-            | _ -> textInMain "Not Implemented"
+            | Posts -> postsPage model
+            | Post t -> postPage model t
             // cond (model.loadState, model.page) <| function
             // | Loading, _ -> textInMain "Loading..."
-            // | _, Home -> homePage model dispatch
-            // | _, Projects -> projectsPage model
-            // | _, Posts -> postsPage model      
-            // | _,_ -> textInMain "Not Implemented"
+            // | Loaded, Home -> homePage model dispatch
+            // | Loaded, Projects -> projectsPage model
+            // | Loaded, Posts -> postsPage model      
+            // | Loaded, Post t -> postPage model t
+            // | _,_ -> textInMain "not impletmented"
         )
         .Year(DateTime.UtcNow.Year |> string |> text)
         .Elt()

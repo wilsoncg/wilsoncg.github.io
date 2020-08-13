@@ -1,4 +1,4 @@
-module Tests
+module MarkdownTests
 
 open System
 open Legivel.Serialization
