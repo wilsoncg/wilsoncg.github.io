@@ -1,6 +1,6 @@
 ---
 title:  "Remove skype context menu with powershell"
-date:   2020-07-28 14:47:00 +0100
+date:   2020-07-28 14:47:00 +01:00
 categories: powershell
 tags: 
   - powershell

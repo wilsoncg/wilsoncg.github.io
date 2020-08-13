@@ -1,6 +1,6 @@
 ---
 title:  "Down the rabbit hole"
-date:   2018-02-25 14:54:00 +0100
+date:   2018-02-25 14:54:00 +01:00
 categories: jekyll
 tags: 
   - jekyll

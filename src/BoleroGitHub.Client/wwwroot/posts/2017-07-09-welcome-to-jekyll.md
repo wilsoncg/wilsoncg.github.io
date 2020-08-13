@@ -1,6 +1,6 @@
 ---
 title:  "Jekyll up and running"
-date:   2017-07-09 16:36:51 +0100
+date:   2017-07-09 16:36:51 +01:00
 categories: jekyll
 tags: 
   - jekyll
