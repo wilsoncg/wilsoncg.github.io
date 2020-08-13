@@ -19,12 +19,18 @@ type Page =
     | [<EndPoint "/projects">] Projects
 
 type Toggle = On | Off
-type PageState = Loading | Loaded
+type LoadState = 
+ | Loading 
+ | Loaded
+ 
 /// The Elmish application's model.
 type Model =
     {
         page: Page
-        markdowns: Map<string, Rendered>
+        markdowns: Map<PageType, Rendered>
+        postIndex: string list
+        posts: (Page * Rendered) list
+        loadState: LoadState
         searchToggle: Toggle
         searchTerm: string
         error: string option
@@ -34,6 +40,9 @@ let initModel =
     {
         page = Home
         markdowns = Map.empty
+        postIndex = list.Empty
+        posts = list.Empty
+        loadState = Loaded
         searchToggle = Off
         searchTerm = ""
         error = None
@@ -42,7 +51,9 @@ let initModel =
 /// The Elmish application's update messages.
 type Message =
     | LoadingPage of Page
-    | GotMarkdown of Page * Rendered
+    | GotProjects of Page * Rendered
+    | GotPostIndex of string list
+    | GotPosts of (Page * Rendered) list
     | SetPage of Page
     | SearchToggle of Toggle
     | SearchTerm of string
@@ -59,24 +70,55 @@ let getAsync (client:HttpClient) (url:string) =
 let getProjectsMd hc = 
     async {
         let! markdown = getAsync hc "/pages/projects.md" 
-        let parsed = Markdown.parse markdown
+        let parsed = Markdown.parse markdown PageType.Projects
         return (Projects, parsed)
+    }
+let getPosts (posts, hc) =
+    async {
+      let! markdowns =
+        posts 
+        |> List.map (fun p -> getAsync hc p)
+        |> Async.Parallel
+      let p = 
+        markdowns 
+        |> Array.toList
+        |> List.map (fun m -> 
+            let parse = Markdown.parse m PageType.Post
+            (Posts, parse))
+      return p
     }
 
 let update httpClient message model =
-    let preLoadProjects = Cmd.ofAsync getProjectsMd httpClient GotMarkdown Error
+    let preLoadProjects = Cmd.ofAsync getProjectsMd httpClient GotProjects Error
+    let getPostIndex = 
+        Cmd.ofAsync (fun hc -> 
+            async { 
+                let! s = getAsync hc "posts/index.txt" 
+                return s.Split Environment.NewLine |> Array.toList
+            }) httpClient GotPostIndex Error
+    let preLoadPosts posts =
+        Cmd.ofAsync getPosts (posts, httpClient) GotPosts Error
     match message with
     | SetPage page ->
         { model with page = page },
         match page with
         | Home -> Cmd.none
         | Projects -> Cmd.ofMsg (LoadingPage Projects)
+        | Posts -> Cmd.ofMsg (LoadingPage Posts)
         | _ -> Cmd.none
     | LoadingPage page ->
-        model, preLoadProjects
-    | GotMarkdown (p,md) ->
-        let m = Map.add "projects" md model.markdowns
-        { model with markdowns = m }, Cmd.none 
+        let loading = { model with loadState = Loading} 
+        match page with 
+        | Projects -> loading, preLoadProjects
+        | Posts -> loading, getPostIndex
+        | _ -> model, Cmd.none
+    | GotProjects (p,md) ->
+        let m = Map.add PageType.Projects md model.markdowns
+        { model with markdowns = m; loadState = Loaded }, Cmd.none
+    | GotPostIndex index ->
+        { model with postIndex = index }, preLoadPosts index
+    | GotPosts posts ->
+        { model with posts = posts; loadState = Loaded }, Cmd.none
     | SearchToggle toggle ->
         { model with searchToggle = if toggle = On then Off else On }, Cmd.none
     | SearchTerm term ->
@@ -126,11 +168,18 @@ let private listProjects (projects: ProjectsFrontMatter) (body:string) =
         .Body(RawHtml body)
         .Elt()
 
-let projectsPage (model:Model) dispatch =
-    let markdownFetched = Map.exists (fun k v -> k = "projects") model.markdowns 
-    cond (markdownFetched && model.markdowns.["projects"].FrontMatter.IsSome) <| function  
-        | true -> listProjects model.markdowns.["projects"].FrontMatter.Value model.markdowns.["projects"].Body
-        | false -> empty
+let projectsPage (model:Model) =
+    let exists = Map.containsKey PageType.Projects model.markdowns
+    cond (exists) <| function  
+     | true ->
+        let md = Map.find PageType.Projects model.markdowns
+        match md.FrontMatter with
+        | Some fm ->
+            match fm with
+            | FrontMatter.Projects p -> listProjects p md.Body
+            | _ -> empty
+        | None -> empty
+     | false -> empty
 
 let textInMain t =
     div [ attr.id "main-content" ; "role" => "main" ] [
@@ -138,6 +187,36 @@ let textInMain t =
             text t
         ]
     ]
+
+let showPostSummary (post:PostFrontMatter) =
+    Main.PostSummary()
+        .headline(post.title)
+        .Elt()
+
+let postsPage (model:Model) =
+    let p =  
+        model.posts 
+        |> List.map (fun (p,r) -> r.FrontMatter)
+        |> List.choose id
+        |> List.map (fun fm -> 
+            match fm with
+            | FrontMatter.Post p -> Some p
+            | _ -> None)
+        |> List.choose id 
+        // |> List.map (Option.bind (fun fm ->
+        //     match fm with
+        //     | FrontMatter.Post p -> showPostSummary p
+        //     | _ -> empty))
+        // |> function
+        //     | Some fm ->
+        //         match fm with
+        //         | FrontMatter.Post p -> [p]
+        //         | _ -> []
+        //     | None -> [])
+    Main
+        .Posts()
+        .PostsList(forEach p showPostSummary)
+        .Elt()
 
 let view model dispatch =
     Main()
@@ -151,11 +230,12 @@ let view model dispatch =
         .ContentIsVisible(if model.searchToggle = On then "is--hidden" else "")
         .SearchIsVisible(if model.searchToggle = On then "is--visible" else "")
         .Body(
-            cond model.page <| function
-            | Home -> homePage model dispatch
-            | Projects -> projectsPage model dispatch
-            //| LoadingPage -> textInMain "Loading..."         
-            | _ -> textInMain "Not Implemented"
+            cond (model.loadState, model.page) <| function
+            | Loading, _ -> textInMain "Loading..."
+            | _, Home -> homePage model dispatch
+            | _, Projects -> projectsPage model
+            | _, Posts -> postsPage model      
+            | _,_ -> textInMain "Not Implemented"
         )
         .Year(DateTime.UtcNow.Year |> string |> text)
         .Elt()

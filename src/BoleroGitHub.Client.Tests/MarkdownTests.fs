@@ -6,7 +6,7 @@ open Xunit
 open BoleroGitHub.Client.Markdown
 
 [<Literal>]
-let FrontMatter = 
+let ProjectsFrontMatter = 
     """layout: splash
 title: "Projects"
 permalink: /projects/
@@ -34,7 +34,7 @@ let ProjectsMarkdown =
     sprintf """--- 
 %s 
 ---
-some text""" FrontMatter
+some text""" ProjectsFrontMatter
 
 let dataFromDeserializeResult (r: DeserializeResult<_> list) =
     r
@@ -45,19 +45,21 @@ let dataFromDeserializeResult (r: DeserializeResult<_> list) =
 
 [<Fact>]
 let ``Check front matter is found`` () =
-    let actual = parse ProjectsMarkdown
+    let actual = parse ProjectsMarkdown PageType.Projects
     Assert.True (Option.isSome actual.FrontMatter) 
 
 [<Fact>]
 let ``Check front matter can be parsed`` () =
-    let actual = parseFrontMatter FrontMatter
+    let actual = 
+      parseFrontMatter ProjectsFrontMatter PageType.Projects
+      |> function 
+         | FrontMatter.Projects fm -> fm 
 
     Assert.NotEmpty actual.Intro
     Assert.Equal ("Projects", actual.Intro.[0].title)
 
     Assert.NotEmpty (actual.FeatureRow)
     Assert.Equal ("web assembly", actual.FeatureRow.[0].alt) 
-
 
 type introcontent = {| title: string; excerpt: string |}
 type intro = {| intro: introcontent list |}
@@ -74,3 +76,57 @@ intro:
     Assert.NotEmpty actual.intro
     Assert.Equal ("Projects", actual.intro.[0].title)
     Assert.Equal ("excerpt", actual.intro.[0].excerpt)
+
+type testDate = {| date: DateTime |}
+[<Fact>]
+let ``Parse date`` () =
+  let s = """date:  2017-07-09 16:36:51 +0100"""
+  let actual = Deserialize<testDate> s |> dataFromDeserializeResult
+
+  Assert.Equal(2017, actual.date.Year)
+  Assert.Equal(7, actual.date.Month)
+  Assert.Equal(9, actual.date.Day)
+
+[<Literal>]
+let PostFrontMatter =
+  """title:  "Jekyll up and running"
+date:   2017-07-09 16:36:51 +0100
+categories: jekyll
+tags: 
+  - jekyll
+  - front matter
+  - getting started
+  - github pages """
+
+[<Literal>]
+let Post = """
+Jekyll is a tool to create static web pages generated from markdown files. This means you don't have to worry about paying for wordpress hosting, or worse setting up a LAMP server, with MySQL/PHP just to host a blog. It's got some really useful features, such as syntax highlighting for all the languages that github supports:
+
+{% highlight csharp %}
+public void Hello(string name)
+{
+    Action<string> helloThere = (n) => 
+    {
+      Console.WriteLine($"Hi, {n}");
+    };
+    helloThere(name);
+}
+Hello("Tom")
+#=> prints 'Hi, Tom' to the Console.
+{% endhighlight %}
+
+Check out the [Jekyll docs][jekyll-docs] for more info on how to use Jekyll.
+
+[jekyll-docs]: https://jekyllrb.com/docs/home
+  """
+let PostWithFrontmatter = 
+    sprintf """--- 
+%s 
+---
+%s""" PostFrontMatter Post
+
+[<Fact>]
+let ``Parse post``() = 
+  let actual = parse PostWithFrontmatter PageType.Post
+
+  Assert.True (Option.isSome actual.FrontMatter) 

@@ -6,6 +6,7 @@ open Markdig
 open Markdig.Extensions.Yaml
 open Markdig.Renderers
 open Markdig.Syntax
+open System
 open System.IO
 open System.Linq
 open System.Text.RegularExpressions
@@ -41,21 +42,40 @@ type ProjectsFrontMatter =
         FeatureRow: FeatureRow
     }
 
+type PostFrontMatter =
+    {
+        title: string
+        date: DateTime
+    }
+
+type PageType =
+    | Projects
+    | Post
+
+type FrontMatter = 
+    | Projects of ProjectsFrontMatter 
+    | Post of PostFrontMatter
+
 type Rendered =
     {
-        FrontMatter: Option<ProjectsFrontMatter>
+        FrontMatter: Option<FrontMatter>
         Body: string
     }
 
-let parseFrontMatter (fm:string) =
-    let r = Deserialize<ProjectsFrontMatter> fm
+let private deserializeAndExtract<'t> s =
+    let r = Deserialize<'t> s
     r 
     |> List.head
     |> function
         | Success s -> s.Data
         | Error e -> e.ToString() |> sprintf "Deserialize failure: %s" |> failwith
 
-let parse markdown = 
+let parseFrontMatter (fm:string) (pt: PageType) : FrontMatter =
+    match pt with
+    | PageType.Projects -> deserializeAndExtract<ProjectsFrontMatter> fm |> FrontMatter.Projects
+    | PageType.Post -> deserializeAndExtract<PostFrontMatter> fm |> FrontMatter.Post
+
+let parse markdown t = 
     let pipeline = MarkdownPipelineBuilder().UseYamlFrontMatter().Build()
     use sw = new StringWriter()
     let renderer = HtmlRenderer(sw)
@@ -68,7 +88,7 @@ let parse markdown =
         | null -> None
         | yaml -> 
             let y = markdown.Substring(yaml.Span.Start, yaml.Span.Length)
-            let parsed = parseFrontMatter y
+            let parsed = parseFrontMatter y t
             parsed |> Some
     {
         FrontMatter = frontmatter

@@ -64,7 +64,17 @@
   <div id="main-content" role="main">
     <div class="archive">
       <h1 id="page-title" class="page_title">Posts</h1>
-      ${Posts}
+      ${PostsList}
+      <template id="PostSummary">
+        <div class="list__item">
+          <article class="archive__item" itemscope="" itemtype="https://schema.org/CreativeWork">
+            <h2 class="archive__item-title no_toc" itemprop="headline">
+                <a href="/powershell/remove-skype-context-menu/" rel="permalink">${headline}</a>
+            </h2>
+            <p class="archive__item-excerpt" itemprop="description">${description}</p>
+          </article>
+        </div>
+      </template>
     </div>
   </div>
 </template>
