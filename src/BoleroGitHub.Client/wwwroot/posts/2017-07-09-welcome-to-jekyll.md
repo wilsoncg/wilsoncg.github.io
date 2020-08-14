@@ -10,7 +10,7 @@ tags:
 ---
 Jekyll is a tool to create static web pages generated from markdown files. This means you don't have to worry about paying for wordpress hosting, or worse setting up a LAMP server, with MySQL/PHP just to host a blog. It's got some really useful features, such as syntax highlighting for all the languages that github supports:
 
-{% highlight csharp %}
+```csharp
 public void Hello(string name)
 {
     Action<string> helloThere = (n) => 
@@ -21,7 +21,7 @@ public void Hello(string name)
 }
 Hello("Tom")
 #=> prints 'Hi, Tom' to the Console.
-{% endhighlight %}
+```
 
 Check out the [Jekyll docs][jekyll-docs] for more info on how to use Jekyll.
 
