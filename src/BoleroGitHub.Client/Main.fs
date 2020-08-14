@@ -10,6 +10,8 @@ open Bolero.Templating.Client
 open BoleroGitHub.Client.Markdown
 open System.Net.Http
 open System.Collections.Generic
+open Microsoft.JSInterop
+open Microsoft.AspNetCore.Components
 
 /// Routing endpoints definition.
 type Page =
@@ -91,7 +93,7 @@ let getPosts (fileLocation, hc) =
       return p
     }
 
-let update httpClient message model =
+let update httpClient jsRuntime message model =
     let preLoadProjects = Cmd.ofAsync getProjectsMd httpClient GotProjects Error
     let getPostIndex = 
         Cmd.ofAsync (fun hc -> 
@@ -114,11 +116,12 @@ let update httpClient message model =
         | Posts -> Cmd.ofMsg (LoadingPage Posts)
         | _ -> Cmd.none
     | LoadingPage page ->
-        let loading = { model with loadState = Loading} 
+        let loading = { model with loadState = Loading}
+        let loaded = { model with loadState = Loaded }
         match page with 
         | Projects -> loading, preLoadProjects
         | Posts -> loading, getPostIndex
-        | _ -> { model with loadState = Loaded }, Cmd.none
+        | _ -> loaded, Cmd.none
     | GotProjects (p,md) ->
         let m = Map.add PageType.Projects md model.markdowns
         { model with markdowns = m; loadState = Loaded }, Cmd.none
@@ -134,6 +137,24 @@ let update httpClient message model =
         { model with error = Some exn.Message }, Cmd.none
     | ClearError ->
         { model with error = None }, Cmd.none
+
+type PostBodyComponentModel =
+    {
+        RawHtml: string
+    }
+type PostBodyComponent() =
+    inherit ElmishComponent<PostBodyComponentModel, Message>()    
+
+    [<Inject>]
+    member val JSRuntime = Unchecked.defaultof<IJSRuntime> with get, set
+
+    override this.View model dispatch =
+        RawHtml model.RawHtml
+
+    override this.OnAfterRenderAsync _ =
+        this.JSRuntime.InvokeVoidAsync(
+            "hljs.initHighlighting")
+            .AsTask()
 
 /// Connects the routing system to the Elmish application.
 let router = Router.infer SetPage (fun model -> model.page)
@@ -224,7 +245,7 @@ let postsPage (model:Model) =
         .PostsList(forEach model.posts showPostSummary)
         .Elt()
 
-let showPost post title =
+let showPost post title dispatch =
     let page, rendered = post
     let extract (pfm:FrontMatter) =
         match pfm with
@@ -235,16 +256,18 @@ let showPost post title =
         |> function
             | Some fm -> (fm.title, fm.date)
             | None -> ("",DateTime.UtcNow)
+    let postBody =
+        ecomp<PostBodyComponent,_,_> [] { RawHtml = rendered.Body } dispatch
     
     Main
         .Post()
         .title(title)
-        .Body(RawHtml rendered.Body)
+        .Body(postBody)
         .datetime(date.ToString("yyyy-MM-ddTHH:mm:ssZ"))
         .shortdate(date.ToString("d MMM, yyyy"))
         .Elt()
 
-let postPage (model:Model) title =    
+let postPage (model:Model) title dispatch =    
     let matches = 
         model.posts 
         |> List.where (fun (p,r) -> 
@@ -254,7 +277,7 @@ let postPage (model:Model) title =
 
     cond matches.IsEmpty <| function
     | true -> textInMain "No post found"
-    | false -> showPost matches.Head title
+    | false -> showPost matches.Head title dispatch
 
 let view model dispatch =
     Main()
@@ -275,7 +298,7 @@ let view model dispatch =
             | Home -> homePage model dispatch
             | Projects -> projectsPage model
             | Posts -> postsPage model
-            | Post t -> postPage model t
+            | Post t -> postPage model t dispatch
             // cond (model.loadState, model.page) <| function
             // | Loading, _ -> textInMain "Loading..."
             // | Loaded, Home -> homePage model dispatch
@@ -292,10 +315,12 @@ type MyApp() =
 
     override this.Program =
         let hc = this.Services.GetService(typeof<HttpClient>) :?> HttpClient
+        let jsRuntime = this.JSRuntime
+        let update = update hc jsRuntime
         Program.mkProgram (fun _ -> 
             initModel, 
-            Cmd.ofMsg(SetPage Home)) (update hc) view
-        |> Program.withRouter router
+            Cmd.ofMsg(SetPage Home)) update view
+        |> Program.withRouter router        
 #if DEBUG
         |> Program.withConsoleTrace
         |> Program.withHotReload
