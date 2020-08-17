@@ -45,13 +45,13 @@ let dataFromDeserializeResult (r: DeserializeResult<_> list) =
 
 [<Fact>]
 let ``Check front matter is found`` () =
-    let actual = parse ProjectsMarkdown PageType.Projects
+    let actual = parse ProjectsMarkdown PageType.Projects ""
     Assert.True (Option.isSome actual.FrontMatter) 
 
 [<Fact>]
 let ``Check front matter can be parsed`` () =
     let actual = 
-      parseFrontMatter ProjectsFrontMatter PageType.Projects
+      parseFrontMatter ProjectsFrontMatter PageType.Projects ""
       |> function 
          | FrontMatter.Projects fm -> fm 
 
@@ -89,35 +89,32 @@ let ``Parse date`` () =
 
 [<Literal>]
 let PostFrontMatter =
-  """title:  "Jekyll up and running"
-date:   2017-07-09 16:36:51 +01:00
-categories: jekyll
+  """title:  "Don't fear the monad"
+date:   2018-03-24 12:35:00 +01:00
+categories: monads
 tags: 
-  - jekyll
-  - front matter
-  - getting started
-  - github pages """
+  - monads
+  - monoids
+  - category theory
+  - functional programming
+  - fsharp
+  - linq """
 
 [<Literal>]
 let Post = """
-Jekyll is a tool to create static web pages generated from markdown files. This means you don't have to worry about paying for wordpress hosting, or worse setting up a LAMP server, with MySQL/PHP just to host a blog. It's got some really useful features, such as syntax highlighting for all the languages that github supports:
+A bunch of useful links covering monads in F# and C#.
 
-{% highlight csharp %}
-public void Hello(string name)
-{
-    Action<string> helloThere = (n) => 
-    {
-      Console.WriteLine($"Hi, {n}");
-    };
-    helloThere(name);
-}
-Hello("Tom")
-#=> prints 'Hi, Tom' to the Console.
-{% endhighlight %}
+## Videos
 
-Check out the [Jekyll docs][jekyll-docs] for more info on how to use Jekyll.
+What is a Monad?
+<a href="https://www.youtube.com/watch?v=t1e8gqXLbsU">
+![What is a monad?](/assets/monads-01-what-is-a-monad.png)
+</a>
 
-[jekyll-docs]: https://jekyllrb.com/docs/home
+Brian Beckman - Don't fear the Monad
+<a href="https://www.youtube.com/watch?v=ZhuHCtR3xq8">
+![Don't fear the Monad](/assets/monads-02-dont-fear-the-monad.png)
+</a>
   """
 let PostWithFrontmatter = 
     sprintf """--- 
@@ -127,12 +124,12 @@ let PostWithFrontmatter =
 
 [<Fact>]
 let ``Parse post``() = 
-  let actual = parse PostWithFrontmatter PageType.Post
+  let actual = parse PostWithFrontmatter PageType.Post ""
 
   Assert.True (Option.isSome actual.FrontMatter)
 
 [<Fact>]
 let ``Parse post for first 10 characters``() =
-  let actual = parse PostWithFrontmatter PageType.Post
+  let actual = parse PostWithFrontmatter PageType.Post ""
 
-  Assert.Equal("Jekyll is ", actual.Summary.Substring (0,10))
+  Assert.Equal("A bunch of", actual.Summary.Substring (0,10))

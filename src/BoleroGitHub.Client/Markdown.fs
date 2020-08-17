@@ -63,20 +63,23 @@ type Rendered =
         Summary: string
     }
 
-let private deserializeAndExtract<'t> s =
+let private deserializeAndExtract<'t> s url =
     let r = Deserialize<'t> s
     r 
     |> List.head
     |> function
         | Success s -> s.Data
-        | Error e -> e.ToString() |> sprintf "Deserialize failure: %s" |> failwith
+        | Error e -> 
+            e.ToString() 
+            |> sprintf "Deserialize failure %s: %s" url 
+            |> failwith
 
-let parseFrontMatter (fm:string) (pt: PageType) : FrontMatter =
+let parseFrontMatter (fm:string) (pt: PageType) (url: string) =
     match pt with
-    | PageType.Projects -> deserializeAndExtract<ProjectsFrontMatter> fm |> FrontMatter.Projects
-    | PageType.Post -> deserializeAndExtract<PostFrontMatter> fm |> FrontMatter.Post
+    | PageType.Projects -> deserializeAndExtract<ProjectsFrontMatter> fm url |> FrontMatter.Projects
+    | PageType.Post -> deserializeAndExtract<PostFrontMatter> fm url |> FrontMatter.Post
 
-let parse markdown t = 
+let parse markdown t url = 
     let pipeline = MarkdownPipelineBuilder().UseYamlFrontMatter().Build()
     use sw = new StringWriter()
     let renderer = HtmlRenderer(sw)
@@ -92,7 +95,7 @@ let parse markdown t =
         | null -> None
         | yaml -> 
             let y = markdown.Substring(yaml.Span.Start, yaml.Span.Length)
-            let parsed = parseFrontMatter y t
+            let parsed = parseFrontMatter y t url
             parsed |> Some
     {
         FrontMatter = frontmatter
