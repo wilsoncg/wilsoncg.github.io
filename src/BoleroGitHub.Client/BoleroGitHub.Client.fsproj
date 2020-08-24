@@ -12,6 +12,7 @@
   </PropertyGroup>
   <ItemGroup>    
     <Compile Include="Markdown.fs" />
+    <Compile Include="PostsPage.fs" />
     <Compile Include="Main.fs" />
     <Compile Include="Startup.fs" />
   </ItemGroup>

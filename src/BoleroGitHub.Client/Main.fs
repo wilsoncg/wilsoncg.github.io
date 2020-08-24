@@ -1,17 +1,16 @@
 module BoleroGitHub.Client.Main
 
 open System
-open System.IO
 open Elmish
 open Bolero
 open Bolero.Html
 open Bolero.Remoting.Client
 open Bolero.Templating.Client
-open BoleroGitHub.Client.Markdown
 open System.Net.Http
 open System.Collections.Generic
 open Microsoft.JSInterop
 open Microsoft.AspNetCore.Components
+open BoleroGitHub.Client.Markdown
 
 /// Routing endpoints definition.
 type Page =
@@ -29,38 +28,41 @@ type LoadState =
 type Model =
     {
         page: Page
-        markdowns: Map<PageType, Rendered>
-        postIndex: string list
-        posts: (Page * Rendered) list
-        loadState: LoadState
+        posts: PostPage.PostPageModel
+        projects: Map<PageType, Rendered>      
         searchToggle: Toggle
+        loadState: LoadState
         searchTerm: string
         error: string option
     }
 
+/// The Elmish application's update messages.
+type Message =
+    | SetPage of Page
+    | PostPageMsg of PostPage.PostPageMsg
+    | LoadProjects
+    | GotProjects of Page * Rendered
+    | SearchToggle of Toggle
+    | SearchTerm of string
+    | Error of exn
+    | ClearError
+
 let initModel =
-    {
+    let initPostsPage, initPostsPageCmd = PostPage.initModel()
+    let initState = {
         page = Home
-        markdowns = Map.empty
-        postIndex = list.Empty
-        posts = list.Empty
+        posts = initPostsPage
+        projects = Map.empty
         loadState = Loaded
         searchToggle = Off
         searchTerm = ""
         error = None
     }
+    let initCmd = Cmd.batch [
+        Cmd.map PostPageMsg initPostsPageCmd
+    ]
+    initState, initCmd
 
-/// The Elmish application's update messages.
-type Message =
-    | LoadingPage of Page
-    | GotProjects of Page * Rendered
-    | GotPostIndex of string list
-    | GotPosts of (Page * Rendered) list
-    | SetPage of Page
-    | SearchToggle of Toggle
-    | SearchTerm of string
-    | Error of exn
-    | ClearError
 
 let getAsync (client:HttpClient) (url:string) =
     async {
@@ -71,64 +73,32 @@ let getAsync (client:HttpClient) (url:string) =
     }
 let getProjectsMd hc = 
     async {
-        let! (markdown, _) = getAsync hc "/pages/projects.md" 
-        let parsed = Markdown.parse markdown PageType.Projects
+        let url = "/pages/projects.md" 
+        let! (markdown, _) = getAsync hc url
+        let parsed = Markdown.parse markdown PageType.Projects url
         return (Projects, parsed)
-    }
-let getPosts (fileLocation, hc) =
-    let titleFromFileLocation (location:string) =
-        location.Replace("posts/","").Replace(".md","")
-    async {
-      let! markdowns =
-        fileLocation 
-        |> List.map (fun p -> getAsync hc p)
-        |> Async.Parallel
-      let p = 
-        markdowns 
-        |> Array.toList
-        |> List.map (fun (m, url) -> 
-            let parsed = Markdown.parse m PageType.Post
-            let title = titleFromFileLocation url
-            (Post title, parsed))
-      return p
     }
 
 let update httpClient jsRuntime message model =
-    let preLoadProjects = Cmd.ofAsync getProjectsMd httpClient GotProjects Error
-    let getPostIndex = 
-        Cmd.ofAsync (fun hc -> 
-            async { 
-                let! (s, _) = getAsync hc "posts/index.txt" 
-                let split = 
-                    s.Trim([| '\r'; '\n' |])
-                    |> fun s -> s.Split Environment.NewLine
-                    |> Array.toList
-                return split
-            }) httpClient GotPostIndex Error
-    let preLoadPosts posts =
-        Cmd.ofAsync getPosts (posts, httpClient) GotPosts Error
+    let asyncLoadProjects = Cmd.ofAsync getProjectsMd httpClient GotProjects Error
+    
     match message with
     | SetPage page ->
         { model with page = page },
         match page with
-        | Home -> Cmd.none
-        | Projects -> Cmd.ofMsg (LoadingPage Projects)
-        | Posts -> Cmd.ofMsg (LoadingPage Posts)
+        | Projects -> Cmd.ofMsg LoadProjects
         | _ -> Cmd.none
-    | LoadingPage page ->
-        let loading = { model with loadState = Loading}
-        let loaded = { model with loadState = Loaded }
-        match page with 
-        | Projects -> loading, preLoadProjects
-        | Posts -> loading, getPostIndex
-        | _ -> loaded, Cmd.none
+    | PostPageMsg msg ->
+        let nextState, nextCmd = PostPage.update httpClient jsRuntime msg model.posts
+        let appState = { model with posts = nextState; error = nextState.error }
+        appState, Cmd.map PostPageMsg nextCmd
+    | LoadProjects ->
+        match model.projects.IsEmpty with
+        | false -> { model with loadState = Loaded }, Cmd.none
+        | true ->  { model with loadState = Loading}, asyncLoadProjects
     | GotProjects (p,md) ->
-        let m = Map.add PageType.Projects md model.markdowns
-        { model with markdowns = m; loadState = Loaded }, Cmd.none
-    | GotPostIndex index ->
-        { model with postIndex = index }, preLoadPosts index
-    | GotPosts posts ->
-        { model with posts = posts; loadState = Loaded }, Cmd.none
+        let m = Map.add PageType.Projects md model.projects
+        { model with projects = m; loadState = Loaded }, Cmd.none    
     | SearchToggle toggle ->
         { model with searchToggle = if toggle = On then Off else On }, Cmd.none
     | SearchTerm term ->
@@ -137,24 +107,6 @@ let update httpClient jsRuntime message model =
         { model with error = Some exn.Message }, Cmd.none
     | ClearError ->
         { model with error = None }, Cmd.none
-
-type PostBodyComponentModel =
-    {
-        RawHtml: string
-    }
-type PostBodyComponent() =
-    inherit ElmishComponent<PostBodyComponentModel, Message>()    
-
-    [<Inject>]
-    member val JSRuntime = Unchecked.defaultof<IJSRuntime> with get, set
-
-    override this.View model dispatch =
-        RawHtml model.RawHtml
-
-    override this.OnAfterRenderAsync _ =
-        this.JSRuntime.InvokeVoidAsync(
-            "hljs.initHighlighting")
-            .AsTask()
 
 /// Connects the routing system to the Elmish application.
 let router = Router.infer SetPage (fun model -> model.page)
@@ -197,10 +149,10 @@ let private listProjects (projects: ProjectsFrontMatter) (body:string) =
         .Elt()
 
 let projectsPage (model:Model) =
-    let exists = Map.containsKey PageType.Projects model.markdowns
+    let exists = Map.containsKey PageType.Projects model.projects
     cond (exists) <| function  
      | true ->
-        let md = Map.find PageType.Projects model.markdowns
+        let md = Map.find PageType.Projects model.projects
         match md.FrontMatter with
         | Some fm ->
             match fm with
@@ -216,69 +168,6 @@ let textInMain t =
         ]
     ]
 
-let showPostSummary (post:Page * Rendered) =
-    let page, rendered = post
-    let url = 
-        match page with
-        | Post p -> p
-        | _ -> ""
-    let extract (pfm:FrontMatter) =
-        match pfm with
-        | FrontMatter.Post p -> Some p
-        | _ -> None
-    let (title, date) = 
-        Option.bind extract rendered.FrontMatter
-        |> function
-            | Some fm -> (fm.title, fm.date.ToString("MM/dd/yyyy"))
-            | None -> ("","")
-
-    Main.PostSummary()
-        .date(date)
-        .posturl(url)
-        .headline(title)
-        .description(rendered.Summary)
-        .Elt()
-
-let postsPage (model:Model) =
-    Main
-        .Posts()
-        .PostsList(forEach model.posts showPostSummary)
-        .Elt()
-
-let showPost post title dispatch =
-    let page, rendered = post
-    let extract (pfm:FrontMatter) =
-        match pfm with
-        | FrontMatter.Post p -> Some p
-        | _ -> None
-    let (title, date) = 
-        Option.bind extract rendered.FrontMatter
-        |> function
-            | Some fm -> (fm.title, fm.date)
-            | None -> ("",DateTime.UtcNow)
-    let postBody =
-        ecomp<PostBodyComponent,_,_> [] { RawHtml = rendered.Body } dispatch
-    
-    Main
-        .Post()
-        .title(title)
-        .Body(postBody)
-        .datetime(date.ToString("yyyy-MM-ddTHH:mm:ssZ"))
-        .shortdate(date.ToString("d MMM, yyyy"))
-        .Elt()
-
-let postPage (model:Model) title dispatch =    
-    let matches = 
-        model.posts 
-        |> List.where (fun (p,r) -> 
-            match p with 
-            | Page.Post t -> printfn "match Post %s=%s" t title ; t = title 
-            | _ -> false)
-
-    cond matches.IsEmpty <| function
-    | true -> textInMain "No post found"
-    | false -> showPost matches.Head title dispatch
-
 let view model dispatch =
     Main()
         .Menu(concat [
@@ -290,6 +179,14 @@ let view model dispatch =
         .SearchTerm(model.searchTerm, fun s -> dispatch(SearchTerm s))
         .ContentIsVisible(if model.searchToggle = On then "is--hidden" else "")
         .SearchIsVisible(if model.searchToggle = On then "is--visible" else "")
+        .Error(
+            cond model.error <| function
+            | None -> empty
+            | Some err ->
+                Main.ErrorNotification()
+                    .ErrorText(err)
+                    .Elt()
+        )
         .Body(
             cond model.loadState <| function
             | Loading -> textInMain "Loading..."
@@ -297,15 +194,8 @@ let view model dispatch =
             cond model.page <| function
             | Home -> homePage model dispatch
             | Projects -> projectsPage model
-            | Posts -> postsPage model
-            | Post t -> postPage model t dispatch
-            // cond (model.loadState, model.page) <| function
-            // | Loading, _ -> textInMain "Loading..."
-            // | Loaded, Home -> homePage model dispatch
-            // | Loaded, Projects -> projectsPage model
-            // | Loaded, Posts -> postsPage model      
-            // | Loaded, Post t -> postPage model t
-            // | _,_ -> textInMain "not impletmented"
+            | Posts -> PostPage.showPostList model.posts (PostPageMsg >> dispatch)
+            | Post t -> PostPage.postPage model.posts t (PostPageMsg >> dispatch)
         )
         .Year(DateTime.UtcNow.Year |> string |> text)
         .Elt()
@@ -317,9 +207,7 @@ type MyApp() =
         let hc = this.Services.GetService(typeof<HttpClient>) :?> HttpClient
         let jsRuntime = this.JSRuntime
         let update = update hc jsRuntime
-        Program.mkProgram (fun _ -> 
-            initModel, 
-            Cmd.ofMsg(SetPage Home)) update view
+        Program.mkProgram (fun _ -> initModel) update view
         |> Program.withRouter router        
 #if DEBUG
         |> Program.withConsoleTrace
