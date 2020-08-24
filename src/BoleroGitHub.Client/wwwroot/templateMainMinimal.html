@@ -33,7 +33,14 @@
     </div>
 </div>
 
+<template id="ErrorNotification">
+  <p class="notice--warning">${ErrorText}</p>
+</template>
+
 <div class="initial-content ${ContentIsVisible}">
+  <div id="error-notification">
+    ${Error}
+  </div>
   ${Body}
 
 <template id="Home">
