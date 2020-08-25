@@ -70,6 +70,7 @@ let asyncLoadPostIndex httpClient =
                     s.Trim([| '\r'; '\n' |])
                     |> fun s -> s.Split Environment.NewLine
                     |> Array.toList
+                    |> List.map (fun s -> s.Trim([| '\r'; '\n' |]))
                     |> List.sortByDescending id
                 return split
             }) httpClient GotPostIndex Error
@@ -85,20 +86,17 @@ let update httpClient jsRuntime message model =
     | LoadPostIndex ->
         match model.postIndex.IsEmpty with
         | false -> { model with loadState = Loaded }, Cmd.none
-        | true -> { model with loadState = Loading }, asyncLoadPostIndex httpClient
+        | true -> { model with loadState = Loading }, asyncLoadPostIndex httpClient    
+    | GotPostIndex index ->
+        { model with postIndex = index }, preLoadPosts httpClient index
+    | GotPosts posts ->
+        let m = posts |> Map.ofList
+        { model with posts = m; loadState = Loaded }, Cmd.none
     | LoadPost p ->
         if not model.postIndex.IsEmpty && not model.posts.IsEmpty then
             { model with loadState = Loaded }, Cmd.none
         else
             { model with loadState = Loading }, Cmd.batch [ asyncLoadPostIndex httpClient ]
-    | GotPostIndex index ->
-        { model with postIndex = index }, preLoadPosts httpClient index
-    | GotPosts posts ->
-        // let partial f x y = f(x,y)
-        // let keys = posts |> List.map fst |> partial String.Join ","
-        // printfn "keys retrieved: %s" keys
-        let m = posts |> Map.ofList
-        { model with posts = m; loadState = Loaded }, Cmd.none
     | Error exn ->
         { model with error = Some exn.Message }, Cmd.none
 
@@ -181,82 +179,8 @@ let findPost model title =
             | Some f -> Some r
             | _ -> None)
 
-let compareWith (comparer:'T -> 'T -> int) (list1: 'T list) (list2: 'T list) =
-    let common: 'T list = List.empty
-    let rec loop list1 list2 c =
-         match list1, list2 with
-         | head1 :: tail1, head2 :: tail2 ->
-               let r = comparer head1 head2
-               if r = 0 then loop tail1 tail2 (List.append c [head1]) else (r, common)
-         | [], [] -> 0, c
-         | _, [] -> 1, c
-         | [], _ -> -1, c
-    loop list1 list2 common
-
-let rec lcs list1 list2 =
-  if List.isEmpty list1 || List.isEmpty list2 then
-    List.Empty
-  else
-    let tail1 = List.tail list1
-    let tail2 = List.tail list2
-    if List.head list1 = List.head list2 then      
-      List.head list1 :: lcs tail1 tail2
-    else
-      let candidate1 = lcs list1 tail2
-      let candidate2 = lcs tail1 list2
-      if List.length candidate1 > List.length candidate2 then
-        candidate1
-      else
-        candidate2
-
-let lcs' list1 list2 =
-    let rec loop list1 list2 =
-        // match list1, list2 with
-        // | [], [] -> List.empty
-        // | head1 :: tail1, head2 :: tail2
-        //     if head1 = head2 then                 
-      if List.isEmpty list1 || List.isEmpty list2 then
-        List.Empty
-      else
-        let tail1 = List.tail list1
-        let tail2 = List.tail list2
-        if List.head list1 = List.head list2 then      
-          List.head list1 :: loop tail1 tail2
-        else
-          let candidate1 = loop list1 tail2
-          let candidate2 = loop tail1 list2
-          if List.length candidate1 > List.length candidate2 then
-            candidate1
-          else
-            candidate2
-    loop list1 list2
-
 let postPage (model:PostPageModel) title dispatch =
-    //let matches = findPost model title
-    let comparison (s1:string) (s2:string) = 
-        let s1' = s1.ToCharArray() |> Array.toList
-        let s2' = s2.ToCharArray() |> Array.toList
-        compareWith (fun x y -> if x = y then 0 else 1) s1' s2'
-        //lcs s1' s2'
-        |> function (i, r) -> r 
-        |> List.toArray 
-        |> String
-
-    printfn "containsKey %s %b" title (model.posts.ContainsKey title)
-    let partial f x y = f(x,y)
-    let keys = model.posts |> Map.toList |> List.map fst |> partial String.Join "," //List.reduce (fun x y -> String.Join
-    printfn "keys %s" keys
-    let matches = 
-        model.posts 
-        |> Map.toList 
-        |> List.map (fun (t,_) -> sprintf "compare %s=%s %s" t title (comparison t title))//comparison t title)
-        //|> List.choose (fun (n, c) -> c)
-        //|> string
-        |> partial String.Join ","
-    printfn "matches %s" matches
-    
-    cond (model.posts.ContainsKey title) <| function
-    | false -> Main.ErrorNotification().ErrorText("No post found").Elt()
-    | true -> showPost model.posts.[title] title dispatch
-    // | true -> textInMain "No post found"
-    // | false -> showPost matches.Head title dispatch
+    let tryFind = Map.tryFind title model.posts     
+    cond tryFind <| function
+    | None -> Main.ErrorNotification().ErrorText("No post found").Elt()
+    | Some _ -> showPost model.posts.[title] title dispatch
