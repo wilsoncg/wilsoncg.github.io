@@ -15,6 +15,12 @@
     <link rel="stylesheet" href="css/custom.css">
     <link rel="stylesheet" href="css/minimal-mistakes-index.css">
     <script src="/js/highlight-10-1-2.pack.js"></script>
+    <script type="text/javascript">
+      window.syntaxHighlight = () => 
+        document.querySelectorAll('pre code').forEach((block) => {
+          hljs.highlightBlock(block);
+        });
+    </script>
   </head>
   <body class="layout--splash" id="main">
     <div class="loading-wrapper">

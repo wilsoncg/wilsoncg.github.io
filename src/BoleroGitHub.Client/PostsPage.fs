@@ -1,6 +1,7 @@
 module BoleroGitHub.Client.PostPage
 
 open System
+open System.Threading.Tasks
 open Elmish
 open Bolero
 open Bolero.Html
@@ -115,10 +116,10 @@ type PostBodyComponent() =
     override this.View model dispatch =
         RawHtml model.RawHtml
 
-    override this.OnAfterRenderAsync _ =
-        this.JSRuntime.InvokeVoidAsync(
-            "hljs.initHighlighting")
-            .AsTask()
+    override this.OnAfterRenderAsync firstRender =
+        match firstRender with
+        | true -> this.JSRuntime.InvokeVoidAsync("syntaxHighlight").AsTask()
+        | false -> ValueTask().AsTask()
 
 type Main = Template<"wwwroot/templateMainMinimal.html">
 
