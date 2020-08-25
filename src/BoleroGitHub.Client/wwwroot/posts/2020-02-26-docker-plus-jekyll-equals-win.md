@@ -9,7 +9,7 @@ tags:
 ---
 I've started to spend more time looking at docker. A useful excerise has been to use the docker jekyll image to setup a working development environment. 
 
-[Previously]({% post_url 2018-02-25-down-the-rabbit-hole %}), it took me 2 days of configuring my windows 10 desktop with:
+[Previously](/post/2018-02-25-down-the-rabbit-hole) it took me 2 days of configuring my windows 10 desktop with:
 * Correct version of Ruby installed
 * Ruby gems installed & configured correctly
 * Make installed (in the event you need to modify & rebuild some part of the toolchain)
