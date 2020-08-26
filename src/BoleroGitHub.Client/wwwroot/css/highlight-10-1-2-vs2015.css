@@ -34,7 +34,7 @@
 
 .hljs-string,
 .hljs-meta-string {
-  color: #D69D85;
+  color: #CE9178;
 }
 
 .hljs-regexp,
@@ -44,10 +44,13 @@
 
 .hljs-subst,
 .hljs-function,
-.hljs-title,
 .hljs-params,
 .hljs-formula {
   color: #DCDCDC;
+}
+
+.hljs-title {
+  color: #4EC9B0;
 }
 
 .hljs-comment,
