@@ -24,6 +24,20 @@ type LoadState =
  | Loading 
  | Loaded
 
+type Size(h:int, w:int) =
+    member this.Height with get() = h
+    member this.Width with get() = w
+    new() = Size(0,0)
+
+type Callback =
+    static member OfSize(f) =
+        DotNetObjectReference.Create(SizeCallback(f))
+
+and SizeCallback(f: Size -> unit) =
+    [<JSInvokable>]
+    member this.Invoke(arg1, arg2) =
+        f (Size(arg1, arg2))
+
 /// The Elmish application's model.
 type Model =
     {
@@ -38,12 +52,14 @@ type Model =
 
 /// The Elmish application's update messages.
 type Message =
+    | InitJSinterop
     | SetPage of Page
     | PostPageMsg of PostPage.PostPageMsg
     | LoadProjects
     | GotProjects of Page * Rendered
     | SearchToggle of Toggle
     | SearchTerm of string
+    | WindowResize of Size
     | Error of exn
     | ClearError
 
@@ -58,7 +74,8 @@ let initModel =
         searchTerm = ""
         error = None
     }
-    let initCmd = Cmd.batch [
+    let initCmd = Cmd.batch [        
+        Cmd.ofMsg InitJSinterop;
         Cmd.map PostPageMsg initPostsPageCmd
     ]
     initState, initCmd
@@ -79,10 +96,16 @@ let getProjectsMd hc =
         return (Projects, parsed)
     }
 
-let update httpClient jsRuntime message model =
+let update httpClient (jsRuntime:IJSRuntime) message model =
     let asyncLoadProjects = Cmd.ofAsync getProjectsMd httpClient GotProjects Error
     
     match message with
+    | InitJSinterop ->
+        model, Cmd.ofSub (fun dispatch -> 
+            // given a size, dispatch a message
+            let onResize = dispatch << WindowResize
+            jsRuntime.InvokeVoidAsync("generalFunctions.initResizeCallback", Callback.OfSize onResize).AsTask() |> ignore
+        )
     | SetPage page ->
         { model with page = page },
         match page with
@@ -103,6 +126,9 @@ let update httpClient jsRuntime message model =
         { model with searchToggle = if toggle = On then Off else On }, Cmd.none
     | SearchTerm term ->
         { model with searchTerm = term}, Cmd.none
+    | WindowResize size ->
+        printfn "WindowResize msg in dotnet (w:%i, h:%i)" size.Width size.Height
+        model, Cmd.none
     | Error exn ->
         { model with error = Some exn.Message }, Cmd.none
     | ClearError ->
@@ -168,13 +194,58 @@ let textInMain t =
         ]
     ]
 
+type CollapsibleMenuComponentModel =
+    {
+        MenuItems: Node list
+        //ScreenSize: int * int
+    }
+type CollapsibleMenuComponent() =
+    inherit ElmishComponent<CollapsibleMenuComponentModel, Message>()    
+
+    [<Inject>]
+    member val JSRuntime = Unchecked.defaultof<IJSRuntime> with get, set
+
+    override this.ShouldRender() = true
+
+    override this.View model dispatch =
+        concat [ 
+            // span [ on.task.load (fun _ -> 
+            //     this.JSRuntime.InvokeVoidAsync("generalFunctions.initResizeCallback", 
+            //         Callback.OfSize (fun f -> dispatch(WindowResize (f.Height, f.Width)))).AsTask()) ] [];
+            ul [ attr.``class`` "visible-links"] [
+                concat model.MenuItems
+            ];
+            button [ attr.``class`` "greedy-nav__toggle hidden"; attr.``type`` "button" ] [
+                span [ attr.``class`` "visually-hidden" ] [ text "Toggle menu"]
+                div [ attr.``class`` "navicon" ] []
+            ];
+            ul [ attr.``class`` "hidden-links hidden"] [
+                concat model.MenuItems
+            ];
+        ]
+
+    // override this.OnAfterRenderAsync firstRender =
+    //     match firstRender with
+    //     | true -> 
+    //         this.JSRuntime.InvokeVoidAsync("generalFunctions.initResizeCallback", 
+    //                 Callback.OfSize (fun f -> this.Dispatch(WindowResize (f.Height, f.Width)))).AsTask()
+    //         // async {
+    //         //     let! r = this.JSRuntime.InvokeAsync<Size>("window.generalFunctions.getSize").AsTask() |> Async.AwaitTask
+    //         //     this.Dispatch (WindowResize (r.height, r.width))
+    //         // } |> Async.StartAsTask :> Threading.Tasks.Task
+    //     | false -> Threading.Tasks.ValueTask().AsTask()
+
 let view model dispatch =
-    Main()
-        .Menu(concat [
+    let menuItems = [
             menuItem model Home "Home";
             menuItem model Projects "Projects";
             menuItem model Posts "Posts";
-        ])
+        ]
+    let collapsibleMenu = 
+        ecomp<CollapsibleMenuComponent,_,_> [] { MenuItems = menuItems } dispatch
+
+    Main()
+        .Menu(collapsibleMenu)
         .SearchToggle(fun _ -> dispatch (SearchToggle model.searchToggle))
         .SearchTerm(model.searchTerm, fun s -> dispatch(SearchTerm s))
         .ContentIsVisible(if model.searchToggle = On then "is--hidden" else "")
@@ -208,7 +279,7 @@ type MyApp() =
         let jsRuntime = this.JSRuntime
         let update = update hc jsRuntime
         Program.mkProgram (fun _ -> initModel) update view
-        |> Program.withRouter router        
+        |> Program.withRouter router
 #if DEBUG
         |> Program.withConsoleTrace
         |> Program.withHotReload

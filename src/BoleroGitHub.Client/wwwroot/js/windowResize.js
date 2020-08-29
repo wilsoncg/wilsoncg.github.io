@@ -17,13 +17,27 @@ window.generalFunctions = {
     },
     resize: function(event){
       var size = this.getSize();
+      //dotnetHelper.invokeMethodAsync('BoleroGitHub.Client','Main.MyApp.OnWindowResizeAsync', size.width, size.height);
+    },
+    initResizeCallback: function(onResize) {
+      console.log("initResizeCallback");
+      window.addEventListener('resize', (ev) => { 
+        this.resizeCallbackJS(onResize);
+      });
+    },
+    resizeCallbackJS: function(callback) {
+      console.log("resizeCallbackJS triggered");
+      var size = this.getSize();
+      callback.invokeMethodAsync('Invoke', size.height, size.width);
+      // dispose needed?
+      // callback.dispose();
     },
     registerResize: function() {
-      window.addEventListener('resize', this)
+      window.addEventListener('resize', this);
     },
     unregisterResize: function() {
-      window.removeEventListener('resize', this)
+      window.removeEventListener('resize', this);
     }
   };
   
-  window.generalFunctions.registerResize();
+  //window.generalFunctions.registerResize();
