@@ -54,7 +54,7 @@ type Model =
 
 /// The Elmish application's update messages.
 type Message =
-    | InitJSinterop
+    | Initialize
     | SetPage of Page
     | PostPageMsg of PostPage.PostPageMsg
     | LoadProjects
@@ -80,7 +80,7 @@ let initModel =
         error = None
     }
     let initCmd = Cmd.batch [        
-        Cmd.ofMsg InitJSinterop;
+        Cmd.ofMsg Initialize;
         Cmd.map PostPageMsg initPostsPageCmd
     ]
     initState, initCmd
@@ -103,14 +103,22 @@ let getProjectsMd hc =
 
 let update httpClient (jsRuntime:IJSRuntime) message model =
     let asyncLoadProjects = Cmd.ofAsync getProjectsMd httpClient GotProjects Error
-    
-    match message with
-    | InitJSinterop ->
-        model, Cmd.ofSub (fun dispatch -> 
+    let setupJSCallback = 
+        Cmd.ofSub (fun dispatch -> 
             // given a size, dispatch a message
             let onResize = dispatch << WindowResize
             jsRuntime.InvokeVoidAsync("generalFunctions.initResizeCallback", Callback.OfSize onResize).AsTask() |> ignore
         )
+    let fireInitialWindowSize =
+        Cmd.ofAsync (fun _ -> async { 
+            return! jsRuntime.InvokeAsync<Size>("generalFunctions.getSize").AsTask() |> Async.AwaitTask }) [] WindowResize Error
+
+    match message with
+    | Initialize ->
+        model, Cmd.batch [
+            setupJSCallback;
+            fireInitialWindowSize;
+        ] 
     | SetPage page ->
         { model with page = page },
         match page with
