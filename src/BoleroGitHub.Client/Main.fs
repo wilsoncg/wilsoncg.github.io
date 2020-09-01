@@ -45,6 +45,8 @@ type Model =
         posts: PostPage.PostPageModel
         projects: Map<PageType, Rendered>      
         searchToggle: Toggle
+        hamburgerVisible: bool
+        hamburgerMenuButtonToggle: Toggle
         loadState: LoadState
         searchTerm: string
         error: string option
@@ -60,6 +62,7 @@ type Message =
     | SearchToggle of Toggle
     | SearchTerm of string
     | WindowResize of Size
+    | HamburgerMenuToggle of Toggle
     | Error of exn
     | ClearError
 
@@ -71,6 +74,8 @@ let initModel =
         projects = Map.empty
         loadState = Loaded
         searchToggle = Off
+        hamburgerVisible = false
+        hamburgerMenuButtonToggle = Off
         searchTerm = ""
         error = None
     }
@@ -127,8 +132,10 @@ let update httpClient (jsRuntime:IJSRuntime) message model =
     | SearchTerm term ->
         { model with searchTerm = term}, Cmd.none
     | WindowResize size ->
-        printfn "WindowResize msg in dotnet (w:%i, h:%i)" size.Width size.Height
-        model, Cmd.none
+        let visible = size.Width < 450
+        { model with hamburgerVisible = visible }, Cmd.none
+    | HamburgerMenuToggle toggle ->
+        { model with hamburgerMenuButtonToggle = if toggle = On then Off else On}, Cmd.none
     | Error exn ->
         { model with error = Some exn.Message }, Cmd.none
     | ClearError ->
@@ -197,7 +204,8 @@ let textInMain t =
 type CollapsibleMenuComponentModel =
     {
         MenuItems: Node list
-        //ScreenSize: int * int
+        HamburgerVisible: bool
+        HamburgerMenuButtonToggle: Toggle
     }
 type CollapsibleMenuComponent() =
     inherit ElmishComponent<CollapsibleMenuComponentModel, Message>()    
@@ -205,35 +213,35 @@ type CollapsibleMenuComponent() =
     [<Inject>]
     member val JSRuntime = Unchecked.defaultof<IJSRuntime> with get, set
 
-    override this.ShouldRender() = true
-
     override this.View model dispatch =
+        let (buttonVisible, standardLinks) = 
+            match model.HamburgerVisible with
+            | false -> ("hidden", "")
+            | true -> ("visible", "hidden")
+        let hamburgerMenuVisible =
+            match model.HamburgerMenuButtonToggle with
+            | On -> "visible"
+            | Off -> "hidden"
+        
+        let partial f x y = f(x,y)
+        let cssClass (s: string list) = s |> partial String.Join " "
+
         concat [ 
-            // span [ on.task.load (fun _ -> 
-            //     this.JSRuntime.InvokeVoidAsync("generalFunctions.initResizeCallback", 
-            //         Callback.OfSize (fun f -> dispatch(WindowResize (f.Height, f.Width)))).AsTask()) ] [];
-            ul [ attr.``class`` "visible-links"] [
+            ul [ attr.``class`` (cssClass ["visible-links"; standardLinks])] [
                 concat model.MenuItems
             ];
-            button [ attr.``class`` "greedy-nav__toggle hidden"; attr.``type`` "button" ] [
-                span [ attr.``class`` "visually-hidden" ] [ text "Toggle menu"]
-                div [ attr.``class`` "navicon" ] []
+            button [ 
+                attr.``class`` (cssClass ["greedy-nav__toggle"; buttonVisible]); 
+                attr.``type`` "button";
+                on.click (fun _ -> 
+                    dispatch (HamburgerMenuToggle model.HamburgerMenuButtonToggle)) ] [
+                    span [ attr.``class`` "visually-hidden" ] [ text "Toggle menu"]
+                    div [ attr.``class`` "navicon" ] []
             ];
-            ul [ attr.``class`` "hidden-links hidden"] [
+            ul [ attr.``class`` (cssClass ["hidden-links"; hamburgerMenuVisible])] [
                 concat model.MenuItems
             ];
         ]
-
-    // override this.OnAfterRenderAsync firstRender =
-    //     match firstRender with
-    //     | true -> 
-    //         this.JSRuntime.InvokeVoidAsync("generalFunctions.initResizeCallback", 
-    //                 Callback.OfSize (fun f -> this.Dispatch(WindowResize (f.Height, f.Width)))).AsTask()
-    //         // async {
-    //         //     let! r = this.JSRuntime.InvokeAsync<Size>("window.generalFunctions.getSize").AsTask() |> Async.AwaitTask
-    //         //     this.Dispatch (WindowResize (r.height, r.width))
-    //         // } |> Async.StartAsTask :> Threading.Tasks.Task
-    //     | false -> Threading.Tasks.ValueTask().AsTask()
 
 let view model dispatch =
     let menuItems = [
@@ -242,7 +250,13 @@ let view model dispatch =
             menuItem model Posts "Posts";
         ]
     let collapsibleMenu = 
-        ecomp<CollapsibleMenuComponent,_,_> [] { MenuItems = menuItems } dispatch
+        ecomp<CollapsibleMenuComponent,_,_> [] 
+         { 
+             MenuItems = menuItems
+             HamburgerVisible = model.hamburgerVisible
+             HamburgerMenuButtonToggle = model.hamburgerMenuButtonToggle
+         } 
+         dispatch
 
     Main()
         .Menu(collapsibleMenu)

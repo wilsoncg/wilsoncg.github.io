@@ -1,7 +1,8 @@
 window.generalFunctions = {
     env: {
       rate: 1000,
-      lastResize: 0
+      lastResize: 0,
+      hamburgerVisible: false
     },
     getSize: function(){
       var size = { "height": window.innerHeight, "width" : window.innerWidth };
@@ -17,18 +18,24 @@ window.generalFunctions = {
     },
     resize: function(event){
       var size = this.getSize();
-      //dotnetHelper.invokeMethodAsync('BoleroGitHub.Client','Main.MyApp.OnWindowResizeAsync', size.width, size.height);
     },
     initResizeCallback: function(onResize) {
-      console.log("initResizeCallback");
-      window.addEventListener('resize', (ev) => { 
+      window.addEventListener('resize', (ev) => {         
         this.resizeCallbackJS(onResize);
       });
     },
     resizeCallbackJS: function(callback) {
-      console.log("resizeCallbackJS triggered");
       var size = this.getSize();
-      callback.invokeMethodAsync('Invoke', size.height, size.width);
+      if(size.width < 450 && !this.env.hamburgerVisible)
+      {
+        this.env.hamburgerVisible = true;
+        callback.invokeMethodAsync('Invoke', size.height, size.width);
+      }
+      if(size.width > 450 && this.env.hamburgerVisible)
+      {
+        this.env.hamburgerVisible = false;
+        callback.invokeMethodAsync('Invoke', size.height, size.width);
+      }
       // dispose needed?
       // callback.dispose();
     },
