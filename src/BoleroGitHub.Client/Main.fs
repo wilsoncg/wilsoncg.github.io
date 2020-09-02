@@ -25,8 +25,10 @@ type LoadState =
  | Loaded
 
 type Size(h:int, w:int) =
-    member this.Height with get() = h
-    member this.Width with get() = w
+    let mutable h = h
+    let mutable w = w
+    member this.Height with get() = h and set(value) = h <- value
+    member this.Width with get() = w and set(value) = w <- value
     new() = Size(0,0)
 
 type Callback =
@@ -47,6 +49,7 @@ type Model =
         searchToggle: Toggle
         hamburgerVisible: bool
         hamburgerMenuButtonToggle: Toggle
+        splashImage: string
         loadState: LoadState
         searchTerm: string
         error: string option
@@ -67,6 +70,10 @@ type Message =
     | ClearError
 
 let initModel =
+    let splash =
+        let images = [ "splash-murcia.jpg"; "splash-blue-min.png"; "splash-retro-car.jpg" ]
+        let r = Random().Next(images.Length)
+        images.[r]
     let initPostsPage, initPostsPageCmd = PostPage.initModel()
     let initState = {
         page = Home
@@ -76,6 +83,7 @@ let initModel =
         searchToggle = Off
         hamburgerVisible = false
         hamburgerMenuButtonToggle = Off
+        splashImage = splash
         searchTerm = ""
         error = None
     }
@@ -110,8 +118,7 @@ let update httpClient (jsRuntime:IJSRuntime) message model =
             jsRuntime.InvokeVoidAsync("generalFunctions.initResizeCallback", Callback.OfSize onResize).AsTask() |> ignore
         )
     let fireInitialWindowSize =
-        Cmd.ofAsync (fun _ -> async { 
-            return! jsRuntime.InvokeAsync<Size>("generalFunctions.getSize").AsTask() |> Async.AwaitTask }) [] WindowResize Error
+        Cmd.ofJS jsRuntime "generalFunctions.getSize" [||] WindowResize Error 
 
     match message with
     | Initialize ->
@@ -154,12 +161,10 @@ let router = Router.infer SetPage (fun model -> model.page)
 
 type Main = Template<"wwwroot/templateMainMinimal.html">
 
-let homePage model dispatch =
-  let splashImages = [ "splash-murcia.jpg"; "splash-blue-min.png"; "splash-retro-car.jpg" ]
-  let r = Random().Next(splashImages.Length)
+let homePage model dispatch =  
   Main
     .Home()
-    .SplashImage(splashImages.[r])
+    .SplashImage(model.splashImage)
     .Elt()
 
 let menuItem (model: Model) (page: Page) (text: string) =
