@@ -72,7 +72,6 @@ let asyncLoadPostIndex httpClient =
                     |> fun s -> s.Split Environment.NewLine
                     |> Array.toList
                     |> List.map (fun s -> s.Trim([| '\r'; '\n' |]))
-                    |> List.sortByDescending id
                 return split
             }) httpClient GotPostIndex Error
 
@@ -123,9 +122,7 @@ type PostBodyComponent() =
 
 type Main = Template<"wwwroot/templateMainMinimal.html">
 
-let renderPostSummary (post:KeyValuePair<string, Rendered>) =
-    let rendered = post.Value
-    let url = post.Key
+let renderPostSummary (url, rendered) =
     let extract (pfm:FrontMatter) =
         match pfm with
         | FrontMatter.Post p -> Some p
@@ -144,9 +141,13 @@ let renderPostSummary (post:KeyValuePair<string, Rendered>) =
         .Elt()
 
 let showPostList (model:PostPageModel) dispatch =
+    let byDescending = 
+        model.posts
+        |> Map.toList
+        |> List.sortByDescending (fun (key, _) -> key)
     Main
         .Posts()
-        .PostsList(forEach model.posts renderPostSummary)
+        .PostsList(forEach byDescending renderPostSummary)
         .Elt()
 
 let showPost post title dispatch =
