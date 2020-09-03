@@ -86,8 +86,25 @@ let parse markdown t url =
     pipeline.Setup(renderer) |> ignore
     let doc = Markdown.Parse(markdown, pipeline)
     let summary = 
-        let plaintext = Markdown.ToPlainText(markdown, pipeline)
-        plaintext.Substring (0, (Math.Min (150, plaintext.Length)))
+        let summarize (s:String) = 
+            let charArrayToString c = c |> Seq.toArray |> String
+            s.Take(160)
+            |> function s -> 
+                if ['.'; '?'].Contains(s.Last())  then charArrayToString s 
+                else (s.Take(156) |> charArrayToString) + " ..."
+
+        let blocks = doc.Descendants<ParagraphBlock>()
+        match blocks.Any() with 
+        | true -> 
+            blocks
+                .SelectMany(fun x -> x.Inline.Descendants<Inlines.LiteralInline>())
+                .First()
+                .ToString()
+                |> summarize
+        | false -> 
+            Markdown
+             .ToPlainText(markdown, pipeline)
+             |> summarize
     renderer.Render(doc) |> ignore
     sw.Flush() |> ignore
     let frontmatter =

@@ -88,7 +88,7 @@ let ``Parse date`` () =
   Assert.Equal(9, actual.date.Day)
 
 [<Literal>]
-let PostFrontMatter =
+let MonadFrontMatter =
   """title:  "Don't fear the monad"
 date:   2018-03-24 12:35:00 +01:00
 categories: monads
@@ -101,7 +101,7 @@ tags:
   - linq """
 
 [<Literal>]
-let Post = """
+let MonadPost = """
 A bunch of useful links covering monads in F# and C#.
 
 ## Videos
@@ -116,20 +116,40 @@ Brian Beckman - Don't fear the Monad
 ![Don't fear the Monad](/assets/monads-02-dont-fear-the-monad.png)
 </a>
   """
-let PostWithFrontmatter = 
+
+[<Literal>]
+let SkypeFrontMatter = """
+title:  "Remove skype context menu with powershell"
+date:   2020-07-28 14:47:00 +01:00
+categories: powershell
+tags: 
+  - powershell
+  - skype
+  - registry
+  - windows terminal """
+
+[<Literal>]
+let SkypePost = """
+Although powershell is enabled by default when installing Windows Terminal, it seems the development team have overlooked the scenario where you want to run a script as Admin and don't want to context switch. Adding the below entry into your terminal settings json file will give you a powershell admin prompt.
+
+Enable run powershell as admin (in windows terminal):
+"""
+
+let PostWithFrontmatter fm p = 
     sprintf """--- 
 %s 
 ---
-%s""" PostFrontMatter Post
+%s""" fm p
 
 [<Fact>]
-let ``Parse post``() = 
-  let actual = parse PostWithFrontmatter PageType.Post ""
+let ``Parse monad post``() = 
+  let actual = parse (PostWithFrontmatter MonadFrontMatter MonadPost) PageType.Post ""
 
   Assert.True (Option.isSome actual.FrontMatter)
+  Assert.Equal("A bunch of useful links covering monads in F# and C#.", actual.Summary)
 
 [<Fact>]
-let ``Parse post for first 10 characters``() =
-  let actual = parse PostWithFrontmatter PageType.Post ""
+let ``Parse skype post for first 10 characters``() =
+  let actual = parse (PostWithFrontmatter SkypeFrontMatter SkypePost) PageType.Post ""
 
-  Assert.Equal("A bunch of", actual.Summary.Substring (0,10))
+  Assert.Equal("Although powershell is enabled by default when installing Windows Terminal, it seems the development team have overlooked the scenario where you want to run ...", actual.Summary)
