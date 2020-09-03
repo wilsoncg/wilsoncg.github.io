@@ -180,8 +180,18 @@ let findPost model title =
             | Some f -> Some r
             | _ -> None)
 
+let textInMain t =
+    div [ attr.id "main-content" ; "role" => "main" ] [
+        div [ attr.``class`` "archive" ] [
+            text t
+        ]
+    ]
+
 let postPage (model:PostPageModel) title dispatch =
-    let tryFind = Map.tryFind title model.posts     
-    cond tryFind <| function
-    | None -> Main.ErrorNotification().ErrorText("No post found").Elt()
-    | Some _ -> showPost model.posts.[title] title dispatch
+    cond model.loadState <| function
+    | Loading -> textInMain "Loading..."
+    | Loaded ->
+        let tryFind = Map.tryFind title model.posts     
+        cond tryFind <| function
+        | None -> Main.ErrorNotification().ErrorText("No post found").Elt()
+        | Some _ -> showPost model.posts.[title] title dispatch
