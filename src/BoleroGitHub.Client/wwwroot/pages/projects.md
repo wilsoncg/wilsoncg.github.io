@@ -12,7 +12,7 @@ feature_row:
     title: "F# Bolero using WebAssembly & Blazor"
     excerpt: "Jekyll blog converted to WebAssembly, written in F# & hosted on github pages. Delivered to the browser using Bolero, an F# extension of Blazor & WebAssembly, which follows the Elmish MVU (Model-View-Update) render pattern."
     url: "https://github.com/wilsoncg/wilsoncg.github.io/"
-    btn_label: "fsbolero.io"
+    btn_label: "wilsoncg.github.io"
     btn_class: "btn--primary"
   - image_path: /assets/004-fsharp.png
     alt: "F#"
