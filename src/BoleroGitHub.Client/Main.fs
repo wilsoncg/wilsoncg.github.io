@@ -59,7 +59,7 @@ type Model =
 type Message =
     | Initialize
     | SetPage of Page
-    | PostPageMsg of PostPage.PostPageMsg
+    | PostPage of PostPage.PostPageMsg
     | LoadProjects
     | GotProjects of Page * Rendered
     | SearchToggle of Toggle
@@ -89,7 +89,7 @@ let initModel =
     }
     let initCmd = Cmd.batch [        
         Cmd.ofMsg Initialize;
-        Cmd.map PostPageMsg initPostsPageCmd
+        Cmd.map PostPage initPostsPageCmd
     ]
     initState, initCmd
 
@@ -130,11 +130,13 @@ let update httpClient (jsRuntime:IJSRuntime) message model =
         { model with page = page },
         match page with
         | Projects -> Cmd.ofMsg LoadProjects
+        | Posts -> Cmd.map PostPage (Cmd.ofMsg PostPage.LoadPostIndex)
+        | Post p -> Cmd.map PostPage (Cmd.ofMsg (PostPage.LoadPost p))
         | _ -> Cmd.none
-    | PostPageMsg msg ->
+    | PostPage msg ->
         let nextState, nextCmd = PostPage.update httpClient jsRuntime msg model.posts
         let appState = { model with posts = nextState; error = nextState.error }
-        appState, Cmd.map PostPageMsg nextCmd
+        appState, Cmd.map PostPage nextCmd
     | LoadProjects ->
         match model.projects.IsEmpty with
         | false -> { model with loadState = Loaded }, Cmd.none
@@ -292,8 +294,8 @@ let view model dispatch =
             cond model.page <| function
             | Home -> homePage model dispatch
             | Projects -> projectsPage model
-            | Posts -> PostPage.showPostList model.posts (PostPageMsg >> dispatch)
-            | Post t -> PostPage.postPage model.posts t (PostPageMsg >> dispatch)
+            | Posts -> PostPage.showPostList model.posts (PostPage >> dispatch)
+            | Post t -> PostPage.postPage model.posts t (PostPage >> dispatch)
         )
         .Year(DateTime.UtcNow.Year |> string |> text)
         .Elt()

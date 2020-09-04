@@ -11,9 +11,8 @@ module Program =
     [<EntryPoint>]
     let Main args =
         let builder = WebAssemblyHostBuilder.CreateDefault(args)
-        let baseAddress = builder.HostEnvironment.BaseAddress
-        printfn "HostEnvironment.BaseAddress %s" baseAddress
-        let http = new HttpClient(BaseAddress = System.Uri(baseAddress))
+        printfn "HostEnvironment %s BaseAddress %s" builder.HostEnvironment.Environment builder.HostEnvironment.BaseAddress
+        let http = new HttpClient(BaseAddress = System.Uri(builder.HostEnvironment.BaseAddress))
         builder.Services.AddScoped<HttpClient>(fun _ -> http) |> ignore
 
         builder.RootComponents.Add<Main.MyApp>("#main")
