@@ -11,14 +11,15 @@ module Program =
     [<EntryPoint>]
     let Main args =
         let builder = WebAssemblyHostBuilder.CreateDefault(args)
+        let baseAddress = builder.HostEnvironment.BaseAddress
+        printfn "HostEnvironment.BaseAddress %s" baseAddress
+        let http = new HttpClient(BaseAddress = System.Uri(baseAddress))
+        builder.Services.AddScoped<HttpClient>(fun _ -> http) |> ignore
+
         builder.RootComponents.Add<Main.MyApp>("#main")
 #if DEBUG
         builder.Logging.SetMinimumLevel(LogLevel.Debug) |> ignore
         builder.Services.AddRemoting(builder.HostEnvironment) |> ignore
-#endif
-        let baseAddress = builder.HostEnvironment.BaseAddress
-        printfn "HostEnvironment.BaseAddress %s" baseAddress
-        let http = new HttpClient(BaseAddress = System.Uri(baseAddress))
-        builder.Services.AddTransient<HttpClient>(fun _ -> http) |> ignore
+#endif        
         builder.Build().RunAsync() |> ignore
         0
