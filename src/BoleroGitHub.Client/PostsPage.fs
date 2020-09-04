@@ -82,7 +82,7 @@ let update httpClient jsRuntime message model =
     
     match message with
     | InitPostPageMsg ->
-        model, Cmd.ofMsg LoadPostIndex
+        model, Cmd.none
     | LoadPostIndex ->
         match model.postIndex.IsEmpty with
         | false -> { model with loadState = Loaded }, Cmd.none
