@@ -20,7 +20,14 @@ feature_row:
     excerpt: "Contribution towards maintenance of F# project FSharp.Control.AsyncSeq, an asynchronous extension package for the F# sequence type."
     url: "https://github.com/fsprojects/FSharp.Control.AsyncSeq"
     btn_label: "github"
-    btn_class: "btn--primary"    
+    btn_class: "btn--primary"
+  - image_path: /assets/005-jupyter.svg
+    alt: "Jupyter"
+    title: "Jupyter with F#"
+    excerpt: "Run F# in browser interactively with the power of Jupyter notebooks."
+    url: "https://mybinder.org/v2/gh/wilsoncg/Jupyter.Notebooks/master?urlpath=%2Fnotebooks%2FXPlot.ipynb"
+    btn_label: "launch binder"
+    btn_class: "btn--primary"
   - image_path: /assets/001-bot.svg
     alt: "bot"
     title: "C# Azure serverless bot"
