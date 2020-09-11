@@ -11,3 +11,8 @@ Uses Bolero - F# Tools for Blazor, see [website](https://fsbolero.io/) and [repo
 dotnet build -c Debug; dotnet run -p .\src\BoleroGitHub.Server\ -c Debug
 ```
 `BoleroGitHub.Server` project uses dotnet Kestrel web server to assist development (template hot reloading). The static site served is contained in `BoleroGitHub.Client` project.
+
+To run as staging environment:
+```powershell
+dotnet publish -c Release;dotnet run -p .\src\BoleroGitHub.Server\ -c Release --launch-profile "KestrelStaging"
+```
