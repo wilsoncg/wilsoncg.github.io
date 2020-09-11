@@ -1,30 +1,15 @@
 module Tests
 
 open System
-open Microsoft.AspNetCore
-open Microsoft.AspNetCore.Builder
-open Microsoft.AspNetCore.Http
 open Microsoft.AspNetCore.Hosting
-open Microsoft.AspNetCore.Mvc
-open Microsoft.AspNetCore.StaticFiles
 open Microsoft.AspNetCore.TestHost
-open Microsoft.Extensions.DependencyInjection
-open Microsoft.Extensions.FileProviders
-open Microsoft.Extensions.Logging
-open Microsoft.Extensions.Hosting
 open Xunit
-open FSharp.Control.Tasks.V2
 open BoleroGitHub.Server
 open System.Net
-open System.IO
 
 [<Fact>]
 let ``Middleware test fetch index.html should be 200`` () =
     async {
-        let projectRootPath = 
-         Path.Combine(
-            [| Directory.GetCurrentDirectory(); ".."; ".."; ".."; ".."; "BoleroGitHub.Client"; "wwwroot" |]
-         )
         let h =
             WebHostBuilder()
                 .UseStaticWebAssets()
@@ -43,10 +28,6 @@ let ``Middleware test fetch index.html should be 200`` () =
 [<Fact>]
 let ``Middleware test fetch /blah should be 404`` () =
     async {
-        let projectRootPath = 
-         Path.Combine(
-            [| Directory.GetCurrentDirectory(); ".."; ".."; ".."; ".."; "BoleroGitHub.Client"; "wwwroot" |]
-         )
         let h =
             WebHostBuilder()
                 .UseStaticWebAssets()
