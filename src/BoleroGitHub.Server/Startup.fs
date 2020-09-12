@@ -31,40 +31,31 @@ type Startup() =
     let contentTypeProvider = FileExtensionContentTypeProvider()
     do  contentTypeProvider.Mappings.[".md"] <- "text/markdown"
 
-    member this.ConfigureServices(services: IServiceCollection) =
+    member this.ConfigureDevelopmentServices(services: IServiceCollection) =
         services.AddControllers() |> ignore
-//#if DEBUG       
         services.AddHotReload(
             templateDir = clientProjPath, 
             delay = System.TimeSpan.FromMilliseconds 1000.)
         |> ignore
-//#endif
+
+    member this.ConfigureStagingServices(services: IServiceCollection) =
+        services.AddControllers() |> ignore            
 
     member this.Configure(app: IApplicationBuilder, env: IWebHostEnvironment) =
         app
          .UseDefaultFiles() |> ignore
 
-        match env.EnvironmentName with
-        | "Staging" -> 
-            app.UseStaticFiles(
-                StaticFileOptions(
-                    FileProvider = new PhysicalFileProvider(
-                        Path.Combine [| serverProjPath; "bin"; "release"; "netcoreapp3.1"; "publish"; "wwwroot" |]
-                    ),
-                    ContentTypeProvider = contentTypeProvider
-                )
-            ) |> ignore
-        | _ ->
-            app.UseStaticFiles(
-                    StaticFileOptions(
-                        FileProvider = new PhysicalFileProvider(
-                            Path.Combine(clientProjPath, "wwwroot")
-                        ),
-                        ContentTypeProvider = contentTypeProvider
-                    )
-            ) |> ignore
+        let folderPath =
+            match env.EnvironmentName with
+            | "Staging" -> Path.Combine [| serverProjPath; "bin"; "release"; "netcoreapp3.1"; "publish"; "wwwroot" |]
+            | _ -> Path.Combine(clientProjPath, "wwwroot")
 
         app
+         .UseStaticFiles(
+                StaticFileOptions(
+                    FileProvider = new PhysicalFileProvider(folderPath),
+                    ContentTypeProvider = contentTypeProvider
+                ))
          .UseRouting()
          .UseBlazorFrameworkFiles()         
          .UseStatusCodePagesWithReExecute("/error/{0}")
@@ -82,7 +73,8 @@ type Startup() =
                 } :> Task
          )
          .UseEndpoints(fun endpoints ->
-            endpoints.UseHotReload() |> ignore
+            if env.EnvironmentName = "Development" then
+                endpoints.UseHotReload() |> ignore
             endpoints.MapControllers() |> ignore
          )         
          |> ignore
