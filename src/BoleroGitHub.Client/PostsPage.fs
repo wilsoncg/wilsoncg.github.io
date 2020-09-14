@@ -147,7 +147,7 @@ let renderPostSummary (url, rendered) =
     let (title, date) = 
         Option.bind extract rendered.FrontMatter
         |> function
-            | Some fm -> (fm.title, fm.date.ToString("MM/dd/yyyy"))
+            | Some fm -> (fm.title, fm.date.ToString("dd/MM/yyyy"))
             | None -> ("","")
 
     Main.PostSummary()
@@ -169,12 +169,12 @@ let showSimplePostList (model:PostPageModel) dispatch =
                 |> Seq.skip 3
                 |> partial
             
-            let date = 
+            let dateSplit = 
                 (titleFromFileLocation pi).Split('-')
-                |> Seq.take 3                 
-                |> partial
-                |> DateTime.Parse
-
+                |> Seq.take 3
+                |> Seq.map Int32.Parse
+                |> Seq.toArray
+            let date = DateTime(dateSplit.[0], dateSplit.[1], dateSplit.[2])
             let pfm = { title = title; date = date }
             let rendered = { 
                 FrontMatter = Some(FrontMatter.Post pfm); 
