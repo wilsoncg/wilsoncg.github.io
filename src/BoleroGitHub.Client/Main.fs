@@ -131,7 +131,7 @@ let update httpClient (jsRuntime:IJSRuntime) message model =
         match page with
         | Projects -> Cmd.ofMsg LoadProjects
         | Posts -> Cmd.map PostPage (Cmd.ofMsg PostPage.LoadPostIndex)
-        | Post p -> Cmd.map PostPage (Cmd.ofMsg (PostPage.LoadPost p))
+        | Post p -> Cmd.map PostPage (Cmd.ofMsg (PostPage.LoadSinglePost p))
         | _ -> Cmd.none
     | PostPage msg ->
         let nextState, nextCmd = PostPage.update httpClient jsRuntime msg model.posts

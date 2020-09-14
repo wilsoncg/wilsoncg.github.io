@@ -26,7 +26,8 @@ type PostPageModel =
 type PostPageMsg =
     | InitPostPageMsg
     | LoadPostIndex
-    | LoadPost of string
+    | LoadSinglePost of string
+    | GotPost of (string * Rendered)
     | GotPostIndex of string list
     | GotPosts of (string * Rendered) list
     | Error of exn
@@ -45,7 +46,7 @@ let getAsync (client:HttpClient) (url:string) =
         return (content, url)
     }
 
-let getPosts (fileLocation, hc) =
+let getPostsParallel (fileLocation, hc) =
     let titleFromFileLocation (location:string) =
         location.Replace("posts/","").Replace(".md","")
     async {
@@ -53,6 +54,7 @@ let getPosts (fileLocation, hc) =
         fileLocation 
         |> List.map (fun p -> getAsync hc p)
         |> Async.Parallel
+
       let p = 
         markdowns 
         |> Array.toList
@@ -76,7 +78,16 @@ let asyncLoadPostIndex httpClient =
             }) httpClient GotPostIndex Error
 
 let preLoadPosts httpClient postIndex =
-    Cmd.ofAsync getPosts (postIndex, httpClient) GotPosts Error
+    Cmd.ofAsync getPostsParallel (postIndex, httpClient) GotPosts Error
+
+let loadSinglePost httpClient title =
+    Cmd.ofAsync (fun hc ->
+        async {
+            let! (doc, _) = sprintf "posts/%s.md" title |> getAsync hc
+            let parsed = Markdown.parse doc PageType.Post title
+            return (title, parsed)
+        }
+    ) httpClient GotPost Error
 
 let update httpClient jsRuntime message model =
     
@@ -92,11 +103,16 @@ let update httpClient jsRuntime message model =
     | GotPosts posts ->
         let m = posts |> Map.ofList
         { model with posts = m; loadState = Loaded }, Cmd.none
-    | LoadPost p ->
-        if not model.postIndex.IsEmpty && not model.posts.IsEmpty then
-            { model with loadState = Loaded }, Cmd.none
-        else
-            { model with loadState = Loading }, Cmd.batch [ asyncLoadPostIndex httpClient ]
+    | LoadSinglePost p ->
+        { model with loadState = Loading }, Cmd.batch [ loadSinglePost httpClient p ]
+    | GotPost (title, parsed) ->
+        let newPosts =
+            match model.posts.TryFind title with
+            | Some _ -> 
+                let m = model.posts.Remove(title)
+                m.Add(title, parsed)
+            | None -> model.posts.Add(title, parsed)
+        { model with loadState = Loaded; posts = newPosts }, Cmd.none
     | Error exn ->
         { model with error = Some exn.Message }, Cmd.none
 
