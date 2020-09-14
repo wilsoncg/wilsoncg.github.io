@@ -169,12 +169,12 @@ let showSimplePostList (model:PostPageModel) dispatch =
                 |> Seq.skip 3
                 |> partial
             
-            let dateSplit = 
+            let date = 
                 (titleFromFileLocation pi).Split('-')
                 |> Seq.take 3
-                |> Seq.map Int32.Parse
-                |> Seq.toArray
-            let date = DateTime(dateSplit.[0], dateSplit.[1], dateSplit.[2])
+                |> partial
+                |> fun s -> DateTime.Parse(s, Globalization.CultureInfo.CreateSpecificCulture("en-GB"))
+
             let pfm = { title = title; date = date }
             let rendered = { 
                 FrontMatter = Some(FrontMatter.Post pfm); 
