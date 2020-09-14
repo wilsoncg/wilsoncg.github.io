@@ -46,9 +46,10 @@ let getAsync (client:HttpClient) (url:string) =
         return (content, url)
     }
 
-let getPostsParallel (fileLocation, hc) =
-    let titleFromFileLocation (location:string) =
+let private titleFromFileLocation (location:string) =
         location.Replace("posts/","").Replace(".md","")
+
+let getPostsParallel (fileLocation, hc) =
     async {
       let! markdowns =
         fileLocation 
@@ -99,7 +100,7 @@ let update httpClient jsRuntime message model =
         | false -> { model with loadState = Loaded }, Cmd.none
         | true -> { model with loadState = Loading }, asyncLoadPostIndex httpClient    
     | GotPostIndex index ->
-        { model with postIndex = index }, preLoadPosts httpClient index
+        { model with postIndex = index; loadState = Loaded }, Cmd.none
     | GotPosts posts ->
         let m = posts |> Map.ofList
         { model with posts = m; loadState = Loaded }, Cmd.none
@@ -156,7 +157,37 @@ let renderPostSummary (url, rendered) =
         .description(rendered.Summary)
         .Elt()
 
-let showPostList (model:PostPageModel) dispatch =
+let showSimplePostList (model:PostPageModel) dispatch =
+    let byDescending = 
+        model.postIndex
+        |> List.sortByDescending id
+        |> List.map (fun pi ->
+            let url = pi
+            let partial (xs : string seq) = String.Join('-', xs)
+            let title = 
+                (titleFromFileLocation pi).Split('-')
+                |> Seq.skip 3
+                |> partial
+            
+            let date = 
+                (titleFromFileLocation pi).Split('-')
+                |> Seq.take 3                 
+                |> partial
+                |> DateTime.Parse
+
+            let pfm = { title = title; date = date }
+            let rendered = { 
+                FrontMatter = Some(FrontMatter.Post pfm); 
+                Body = ""; 
+                Summary = "" }
+            (url, rendered)
+        )
+    Main
+        .Posts()
+        .PostsList(forEach byDescending renderPostSummary)
+        .Elt()
+
+let showFullPostList (model:PostPageModel) dispatch =
     let byDescending = 
         model.posts
         |> Map.toList

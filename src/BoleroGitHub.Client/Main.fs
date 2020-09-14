@@ -294,7 +294,7 @@ let view model dispatch =
             cond model.page <| function
             | Home -> homePage model dispatch
             | Projects -> projectsPage model
-            | Posts -> PostPage.showPostList model.posts (PostPage >> dispatch)
+            | Posts -> PostPage.showSimplePostList model.posts (PostPage >> dispatch)
             | Post t -> PostPage.postPage model.posts t (PostPage >> dispatch)
         )
         .Year(DateTime.UtcNow.Year |> string |> text)
