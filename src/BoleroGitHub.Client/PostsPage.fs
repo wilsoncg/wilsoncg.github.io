@@ -1,14 +1,14 @@
 module BoleroGitHub.Client.PostPage
 
 open System
+open System.Globalization
+open System.Net.Http
 open System.Threading.Tasks
 open Elmish
 open Bolero
 open Bolero.Html
 open Bolero.Remoting.Client
 open Bolero.Templating.Client
-open System.Net.Http
-open System.Collections.Generic
 open Microsoft.JSInterop
 open Microsoft.AspNetCore.Components
 open BoleroGitHub.Client.Markdown
@@ -173,7 +173,10 @@ let showSimplePostList (model:PostPageModel) dispatch =
                 (titleFromFileLocation pi).Split('-')
                 |> Seq.take 3
                 |> partial
-                |> fun s -> DateTime.Parse(s, Globalization.CultureInfo.CreateSpecificCulture("en-GB"))
+                |> fun s -> DateTime.TryParseExact(s, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None)
+                |> function 
+                    | (true, d) -> d
+                    | (false, _) -> DateTime.UtcNow 
 
             let pfm = { title = title; date = date }
             let rendered = { 
