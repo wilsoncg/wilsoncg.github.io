@@ -4,7 +4,7 @@
 
 Repository for [wilsoncg.net](https://www.wilsoncg.net).
 
-Uses Bolero - F# Tools for Blazor, see [website](https://fsbolero.io/) and [repository](https://github.com/fsbolero/Bolero).
+Uses Bolero - F# Tools for Blazor, see Bolero [website](https://fsbolero.io/) and [repository](https://github.com/fsbolero/Bolero).
 
 ## To build & Run
 ```powershell
@@ -16,3 +16,236 @@ To run as staging environment:
 ```powershell
 dotnet publish -c Release;dotnet run -p .\src\BoleroGitHub.Server\ -c Release --launch-profile "KestrelStaging"
 ```
+# You've heard of JAMstack, now it's time to meet BAMstack
+
+JAMstack is a cloud-native web development architecture based on client-side JavaScript code, BAMstack is a step forward using WebAssembly.
+
+## What is BAMstack?
+
+> “A modern web development architecture based on client-side **B**olero, web **A**ssembly, and prebuilt **M**arkup”
+
+<div class="small"><cite>Craig Wilson</cite> (.Net Developer)</div>
+
+## Benefits
+* Cross platform development & delivery with [.NET Core](https://docs.microsoft.com/en-us/dotnet/core/about) & WebAssembly with [Bolero](https://fsbolero.io/docs/)
+* [Elmish](https://elmish.github.io/elmish/) Model-View-Update functional approach to building a reactive UI
+* Access the full suite of community created [Blazor resources](https://github.com/AdrienTorris/awesome-blazor)
+* Utilise [MarkDig](https://github.com/lunet-io/markdig) tool which converts markdown to html 
+
+## Motivation
+There were two motivating factors which lead to the decision to convert this blog from jekyll to .Net & WebAssembly:
+
+1. Randomizing the header splash image on page reload. After some [investigation](https://shaharkadmiel.github.io/Loading-random-header-image/) it's a surpisingly non-trivial task. This involes fiddling with liquid syntax & loops in order to fetch the list of image files in a folder, creating a customized page template and finally combining some handcrafted javascript to instruct the browser to randomly fetch an image file.
+2. Bypassing the jekyll engine for specified sub directories in order to serve up some WebAssembly.
+
+## Other benefits
+
+### ✅ No more Gem file security alerts
+![Image Link](/src/BoleroGitHub.Client/wwwroot/assets/2020-08-25-gem-alerts.png)
+
+### ✅ Thousands of lines of un-necessary YAML/HTML/JavaScript/Ruby removed
+![Image Link](/src/BoleroGitHub.Client/wwwroot/assets/2020-08-25-lang-overview.png)
+
+### ✅ Forget node.js & node_modules bloat
+Say goodbye to maintenance of [300MB node_modules directories](https://www.reddit.com/r/webdev/comments/42cpjy/why_is_my_node_modules_directory_140mb_is_this/) & potential [javascript security issues](https://www.theregister.com/2016/03/23/npm_left_pad_chaos/). 
+
+### ✅ Much simpler splash header randomization
+
+```fsharp
+let splashImages = [ "splash-1.jpg"; "splash-2.png"; "splash-3.jpg" ]
+  let r = Random().Next(splashImages.Length)
+  Main
+    .Home()
+    .SplashImage(splashImages.[r])
+    .Elt()
+```
+
+### ✅ Simplified search button toggle
+```fsharp
+type Toggle = On | Off
+type Model = { searchToggle: Toggle }
+type Message =
+    | SearchToggle of Toggle
+
+let initModel = { searchToggle = Off }
+let update message model =
+    match message with
+    | SearchToggle toggle ->
+        { model with searchToggle = if toggle = On then Off else On }, Cmd.none
+
+type Main = Template<"wwwroot/templateMainMinimal.html">
+let view model dispatch =
+    Main()
+    .SearchToggle(fun _ -> dispatch (SearchToggle model.searchToggle))
+    .ContentIsVisible(if model.searchToggle = On then "is--hidden" else "")
+    .SearchIsVisible(if model.searchToggle = On then "is--visible" else "")
+    .Elt()
+```
+And some definitions in the html template:
+```html
+<nav id="site-nav">
+    <button class="search__toggle" type="button" onClick="${SearchToggle}">
+        <span>Toggle search</span>
+    </button>
+</nav>
+
+<div class="initial-content ${ContentIsVisible}">
+    ...
+</div>
+
+<div class="search-content ${SearchIsVisible}">
+    ...
+</div>
+```
+
+## Conversion from Jekyll to Bolero
+
+### ❕ highlight.js requires javascript Blazor interop
+
+First we have to include highlight.js, along with a function for enabling the highlight:
+```html
+<head>
+ <script src="/js/highlight-10-1-2.pack.js"></script>
+ <script type="text/javascript">
+      window.syntaxHighlight = () => 
+        document.querySelectorAll('pre code').forEach((block) => {
+          hljs.highlightBlock(block);
+        });
+ </script>
+</head>
+```
+
+We need a mechanism to trigger the highlighting, as the usual DOM loaded event is not triggered. Fortunately Bolero has an ElmishComponent we can utilize. With the injected IJSRuntime, we can have Blazor asynchronously call the syntaxHighlight() javascript function after it has rendered the component.
+```fsharp
+type PostBodyComponentModel = { RawHtml: string }
+type PostBodyComponent() =
+    inherit ElmishComponent<PostBodyComponentModel, PostPageMsg>()    
+
+    [<Inject>]
+    member val JSRuntime = Unchecked.defaultof<IJSRuntime> with get, set
+
+    override this.ShouldRender() = true
+
+    override this.View model dispatch =
+        RawHtml model.RawHtml
+
+    override this.OnAfterRenderAsync firstRender =
+        match firstRender with
+        | true -> 
+            this.JSRuntime.InvokeVoidAsync("syntaxHighlight").AsTask()
+        | false -> ValueTask().AsTask()
+```
+
+We then use the Bolero html helper ecomp, which creates an html fragment from our Blazor component. Then the view funcion places that component into the Body hole defined in the html template.
+```fsharp
+let showPost post title dispatch =
+    let rendered = post    
+    let postBody =
+        ecomp<PostBodyComponent,_,_> [] { RawHtml = rendered.Body } dispatch
+    
+    Main
+        .Body(postBody)
+        .Elt()
+```
+### ❕ Hooking into window resize event requires calling into .NET from JS
+
+First we define some Javascript, notice the callback will be provided to the JS environment. We see that the .NET framework will create the machinery for us. 
+```javascript
+window.generalFunctions = {
+    env: {
+      hamburgerVisible: false
+    },
+    getSize: function(){
+      var size = { "height": window.innerHeight, "width" : window.innerWidth };
+      return size;
+    },
+    initResizeCallback: function(onResize) {
+      window.addEventListener('resize', (ev) => {         
+        this.resizeCallbackJS(onResize);
+      });
+    },
+    resizeCallbackJS: function(callback) {
+      var size = this.getSize();
+      if(size.width < 450 && !this.env.hamburgerVisible)
+      {
+        this.env.hamburgerVisible = true;
+        callback.invokeMethodAsync('Invoke', size.height, size.width);
+      }
+      if(size.width > 450 && this.env.hamburgerVisible)
+      {
+        this.env.hamburgerVisible = false;
+        callback.invokeMethodAsync('Invoke', size.height, size.width);
+      }
+    }
+  };
+```
+This should be loaded after the blazor WASM framework initialization.
+```html
+<script src="_framework/blazor.webassembly.js"></script>
+<script src="/js/windowResize.js"></script>
+```
+We then use `DotNetObjectReference.Create()` to a DotNet JS interop object which is passed into the Javascript defined above. We can define a helper `Callback` type which will be decorated with `JSInvokable`, this allows the blazor framework to correctly identify & call the instance method. We create a subscription message during initialization, where the Javascript is instructed to call the `Invoke()` method on the .NET object. With this mechanism we have achieved JS interop, where a WindowResize message will be dispatched within Bolero on each `window.resize` DOM event.
+```fsharp
+type Size(h:int, w:int) =
+    member this.Height with get() = h
+    member this.Width with get() = w
+    new() = Size(0,0)
+
+type Callback =
+    static member OfSize(f) =
+        DotNetObjectReference.Create(SizeCallback(f))
+
+and SizeCallback(f: Size -> unit) =
+    [<JSInvokable>]
+    member this.Invoke(arg1, arg2) =
+        f (Size(arg1, arg2))
+
+type Message =
+    | Initialize
+    | WindowResize of Size
+
+let update (jsRuntime:IJSRuntime) message model =
+    let setupJSCallback = 
+        Cmd.ofSub (fun dispatch -> 
+            // given a size, dispatch a message
+            let onResize = dispatch << WindowResize
+            jsRuntime.InvokeVoidAsync("generalFunctions.initResizeCallback", Callback.OfSize onResize).AsTask() |> ignore
+        )
+    
+    match message with
+    | Initialize -> model, setupJSCallback
+    | WindowResize size ->
+        // handle window resize message
+        model, Cmd.none
+```
+
+### ❕ Parsing markdown & YAML front matter from files
+
+As WebAssembly runs inside the browser sandbox, if we attempt to load a markdown file using `System.File.IO.ReadLAllText()` we will receive an error from the mono wasm runtime. To overcome this we first need to hook into msbuild with a custom build target which generates an index of markdown files.
+```xml
+<Target Name="GenerateIndexJsonForPostsFolder">
+ <ItemGroup>
+  <_MarkdownPosts 
+    Include="$(_BlazorCurrentProjectWWWroot)\posts\**\*.md" />
+  <_MarkdownPostsRelative 
+    Include="@(_MarkdownPosts->'posts/%(Filename)%(Extension)')" />
+ </ItemGroup>
+ <WriteLinesToFile
+    File="$(_BlazorCurrentProjectWWWroot)\posts\index.txt"
+    Lines="@(_MarkdownPostsRelative)"
+    Overwrite="true"
+    Encoding="Unicode"/>
+</Target>
+<PropertyGroup>
+ <_BlazorCopyFilesToOutputDirectoryDependsOn>
+ $(_BlazorCopyFilesToOutputDirectoryDependsOn);
+ GenerateIndexJsonForPostsFolder
+ </_BlazorCopyFilesToOutputDirectoryDependsOn>
+</PropertyGroup>
+```
+We can then asynchronously fetch the `/posts/index.txt` file from the server, then for each markdown file listed in `index.txt`, we can retrieve and parse the markdown. You could argue that this is redundant as Bolero already has an inbuilt html templating mechanism, but I wanted to see if it's possible to keep the existing jekyll markdown files and combine the two rendering systems. The full implementation details can be found in `PostPage.fs` & `Markdown.fs`. 
+
+### Useful links:
+
+* [FBlazorShop](https://github.com/OnurGumus/FBlazorShop/) - An F# implementation of Steve Sanderson's pizza store blazor app workshop
+* [TryFSharpOnWasm](https://github.com/fsbolero/TryFSharpOnWasm/) - F# compiler running in WebAssembly with Bolero. A useful working reference application showing JS interop & other Bolero/Blazor features.
