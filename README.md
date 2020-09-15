@@ -7,6 +7,8 @@ Repository for [wilsoncg.net](https://www.wilsoncg.net).
 Uses Bolero - F# Tools for Blazor, see Bolero [website](https://fsbolero.io/) and [repository](https://github.com/fsbolero/Bolero).
 
 ## To build & Run
+
+with [.NET Core SDK 3.1.300 or newer](https://dotnet.microsoft.com/download)
 ```powershell
 dotnet build -c Debug; dotnet run -p .\src\BoleroGitHub.Server\ -c Debug
 ```
