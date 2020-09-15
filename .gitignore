@@ -9,3 +9,4 @@ obj/
 .fake
 .ionide
 **/posts/index.txt
+**/posts/index.json

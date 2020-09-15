@@ -1,0 +1,36 @@
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <UsingTask
+        TaskName="WriteJsonIndex"
+        TaskFactory="RoslynCodeTaskFactory"
+        AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" >
+    <ParameterGroup>
+      <Lines ParameterType="System.String[]" Required="true" />
+      <JsonString ParameterType="System.String" Output="true" />
+    </ParameterGroup>
+    <Task>
+      <Code Type="Fragment" Language="cs">
+<![CDATA[
+var withQuotes = Lines.Select(x => $"\"{x}\"");            
+JsonString = $"{{\"posts\":[{ String.Join(",", withQuotes) }]}}";
+]]>
+      </Code>
+    </Task>
+  </UsingTask>
+  <Target Name="GenerateIndexJsonForPostsFolder" AfterTargets="Build">
+    <ItemGroup>
+      <_MarkdownPosts Include="$(_BlazorCurrentProjectWWWroot)\posts\**\*.md" />
+      <_MarkdownPostsRelative Include="@(_MarkdownPosts->'posts/%(Filename)%(Extension)')" />
+    </ItemGroup>
+    <WriteJsonIndex Lines="@(_MarkdownPostsRelative)">
+      <Output TaskParameter="JsonString" PropertyName="_JsonString" />
+    </WriteJsonIndex>
+    <WriteLinesToFile
+            File="$(_BlazorCurrentProjectWWWroot)\posts\index.json"
+            Lines="$(_JsonString)"
+            Overwrite="true"
+            Encoding="Unicode"/>
+  </Target>
+  <PropertyGroup>
+    <_BlazorCopyFilesToOutputDirectoryDependsOn>$(_BlazorCopyFilesToOutputDirectoryDependsOn);GenerateIndexJsonForPostsFolder</_BlazorCopyFilesToOutputDirectoryDependsOn>
+  </PropertyGroup>
+</Project>

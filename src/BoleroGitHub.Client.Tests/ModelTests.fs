@@ -1,6 +1,8 @@
 module ModelTests
 
 open System
+open System.Text.Json
+open System.Text.Json.Serialization
 open Xunit
 open BoleroGitHub.Client.Main
 open BoleroGitHub.Client.Markdown
@@ -20,3 +22,12 @@ let ``Check can find post in model`` () =
     Assert.False(matches "title-to-find" |> Seq.isEmpty, "could not find title-to-find")
     Assert.True(matches "title-which-doesnt-exist" |> Seq.isEmpty)
 
+[<JsonFSharpConverter>]
+type JsonPosts = { posts : string []}
+
+[<Fact>]
+let ``Can deserialize anonymous type`` () =   
+    let options = JsonSerializerOptions()
+    options.Converters.Add(JsonFSharpConverter())
+    let actual = JsonSerializer.Deserialize<{| posts : string[] |}>("""{"posts":["post1","post2"]}""", options)
+    Assert.Equal({| posts = [|"post1";"post2"|] |}, actual)

@@ -4,6 +4,7 @@ open System
 open System.Globalization
 open System.Net.Http
 open System.Threading.Tasks
+open System.Text.Json
 open Elmish
 open Bolero
 open Bolero.Html
@@ -12,6 +13,7 @@ open Bolero.Templating.Client
 open Microsoft.JSInterop
 open Microsoft.AspNetCore.Components
 open BoleroGitHub.Client.Markdown
+open System.Text.Json.Serialization
 
 type LoadState =
     | Loading
@@ -69,13 +71,15 @@ let getPostsParallel (fileLocation, hc) =
 let asyncLoadPostIndex httpClient = 
         Cmd.ofAsync (fun hc -> 
             async { 
-                let! (s, _) = getAsync hc "posts/index.txt" 
-                let split = 
-                    s.Trim([| '\r'; '\n' |])
-                    |> fun s -> s.Split Environment.NewLine
-                    |> Array.toList
-                    |> List.map (fun s -> s.Trim([| '\r'; '\n' |]))
-                return split
+                let! (s, _) = getAsync hc "posts/index.json"
+                let options = JsonSerializerOptions()
+                options.Converters.Add(JsonFSharpConverter())
+                let data = JsonSerializer.Deserialize<{| posts : string[] |}>(s, options)
+                let posts = 
+                    match data.posts with
+                    | null -> list.Empty
+                    | p -> p |> Array.toList
+                return posts
             }) httpClient GotPostIndex Error
 
 let preLoadPosts httpClient postIndex =
