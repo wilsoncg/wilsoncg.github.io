@@ -166,7 +166,7 @@ let showSimplePostList (model:PostPageModel) dispatch =
         model.postIndex
         |> List.sortByDescending id
         |> List.map (fun pi ->
-            let url = pi
+            let url = titleFromFileLocation pi
             let partial (xs : string seq) = String.Join('-', xs)
             let title = 
                 (titleFromFileLocation pi).Split('-')
