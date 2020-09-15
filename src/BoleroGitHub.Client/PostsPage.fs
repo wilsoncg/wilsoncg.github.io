@@ -71,7 +71,7 @@ let getPostsParallel (fileLocation, hc) =
 let asyncLoadPostIndex httpClient = 
         Cmd.ofAsync (fun hc -> 
             async { 
-                let! (s, _) = getAsync hc "posts/index.json"
+                let! (s, _) = getAsync hc "posts/list.json"
                 let options = JsonSerializerOptions()
                 options.Converters.Add(JsonFSharpConverter())
                 let data = JsonSerializer.Deserialize<{| posts : string[] |}>(s, options)

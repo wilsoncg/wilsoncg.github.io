@@ -25,10 +25,10 @@ JsonString = $"{{\"posts\":[{ String.Join(",", withQuotes) }]}}";
       <Output TaskParameter="JsonString" PropertyName="_JsonString" />
     </WriteJsonIndex>
     <WriteLinesToFile
-            File="$(_BlazorCurrentProjectWWWroot)\posts\index.json"
+            File="$(_BlazorCurrentProjectWWWroot)\posts\list.json"
             Lines="$(_JsonString)"
             Overwrite="true"
-            Encoding="Unicode"/>
+            Encoding="utf-8"/>
   </Target>
   <PropertyGroup>
     <_BlazorCopyFilesToOutputDirectoryDependsOn>$(_BlazorCopyFilesToOutputDirectoryDependsOn);GenerateIndexJsonForPostsFolder</_BlazorCopyFilesToOutputDirectoryDependsOn>
