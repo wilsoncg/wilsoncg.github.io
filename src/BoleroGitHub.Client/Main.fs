@@ -7,7 +7,6 @@ open Bolero.Html
 open Bolero.Remoting.Client
 open Bolero.Templating.Client
 open System.Net.Http
-open System.Collections.Generic
 open Microsoft.JSInterop
 open Microsoft.AspNetCore.Components
 open BoleroGitHub.Client.Markdown
@@ -110,7 +109,7 @@ let getProjectsMd hc =
     }
 
 let update httpClient (jsRuntime:IJSRuntime) message model =
-    let asyncLoadProjects = Cmd.ofAsync getProjectsMd httpClient GotProjects Error
+    let asyncLoadProjects = Cmd.OfAsync.either getProjectsMd httpClient GotProjects Error
     let setupJSCallback = 
         Cmd.ofSub (fun dispatch -> 
             // given a size, dispatch a message
@@ -118,7 +117,7 @@ let update httpClient (jsRuntime:IJSRuntime) message model =
             jsRuntime.InvokeVoidAsync("generalFunctions.initResizeCallback", Callback.OfSize onResize).AsTask() |> ignore
         )
     let fireInitialWindowSize =
-        Cmd.ofJS jsRuntime "generalFunctions.getSize" [||] WindowResize Error 
+        Cmd.OfJS.either jsRuntime "generalFunctions.getSize" [||] WindowResize Error 
 
     match message with
     | Initialize ->

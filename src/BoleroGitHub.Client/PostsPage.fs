@@ -69,7 +69,7 @@ let getPostsParallel (fileLocation, hc) =
     }
 
 let asyncLoadPostIndex httpClient = 
-        Cmd.ofAsync (fun hc -> 
+        Cmd.OfAsync.either (fun hc -> 
             async { 
                 let! (s, _) = getAsync hc "posts/list.json"
                 let options = JsonSerializerOptions()
@@ -83,10 +83,10 @@ let asyncLoadPostIndex httpClient =
             }) httpClient GotPostIndex Error
 
 let preLoadPosts httpClient postIndex =
-    Cmd.ofAsync getPostsParallel (postIndex, httpClient) GotPosts Error
+    Cmd.OfAsync.either getPostsParallel (postIndex, httpClient) GotPosts Error
 
 let loadSinglePost httpClient title =
-    Cmd.ofAsync (fun hc ->
+    Cmd.OfAsync.either (fun hc ->
         async {
             let! (doc, _) = sprintf "posts/%s.md" title |> getAsync hc
             let parsed = Markdown.parse doc PageType.Post title

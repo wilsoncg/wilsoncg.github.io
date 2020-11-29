@@ -7,14 +7,9 @@ open Microsoft.AspNetCore
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Http
 open Microsoft.AspNetCore.Hosting
-open Microsoft.AspNetCore.Mvc
 open Microsoft.AspNetCore.StaticFiles
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.FileProviders
-open Microsoft.Extensions.Logging
-open Bolero
-open Bolero.Remoting.Server
-open Bolero.Server.RazorHost
 open Bolero.Templating.Server
 open FSharp.Control.Tasks.V2
 open Microsoft.Extensions.FileProviders.Physical
@@ -47,7 +42,7 @@ type Startup() =
 
         let folderPath =
             match env.EnvironmentName with
-            | "Staging" -> Path.Combine [| serverProjPath; "bin"; "release"; "netcoreapp3.1"; "publish"; "wwwroot" |]
+            | "Staging" -> Path.Combine [| serverProjPath; "bin"; "release"; "net5.0"; "publish"; "wwwroot" |]
             | _ -> Path.Combine(clientProjPath, "wwwroot")
 
         app
