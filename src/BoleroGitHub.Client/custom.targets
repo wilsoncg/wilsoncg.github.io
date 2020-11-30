@@ -16,21 +16,21 @@ JsonString = $"{{\"posts\":[{ String.Join(",", withQuotes) }]}}";
       </Code>
     </Task>
   </UsingTask>
-  <Target Name="GenerateIndexJsonForPostsFolder" AfterTargets="Build">
+  <Target Name="GenerateIndexJsonForPostsFolder" BeforeTargets="GetCurrentProjectStaticWebAssets ">
     <ItemGroup>
-      <_MarkdownPosts Include="$(_BlazorCurrentProjectWWWroot)\posts\**\*.md" />
+      <_MarkdownPosts Include="$(_WwwRootPath)\posts\**\*.md" />
       <_MarkdownPostsRelative Include="@(_MarkdownPosts->'posts/%(Filename)%(Extension)')" />
     </ItemGroup>
     <WriteJsonIndex Lines="@(_MarkdownPostsRelative)">
       <Output TaskParameter="JsonString" PropertyName="_JsonString" />
     </WriteJsonIndex>
     <WriteLinesToFile
-            File="$(_BlazorCurrentProjectWWWroot)\posts\list.json"
+            File="$(_WwwRootPath)\posts\list.json"
             Lines="$(_JsonString)"
             Overwrite="true"
             Encoding="utf-8"/>
   </Target>
   <PropertyGroup>
-    <_BlazorCopyFilesToOutputDirectoryDependsOn>$(_BlazorCopyFilesToOutputDirectoryDependsOn);GenerateIndexJsonForPostsFolder</_BlazorCopyFilesToOutputDirectoryDependsOn>
+    <_WwwRootPath>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), `wwwroot`))</_WwwRootPath>
   </PropertyGroup>
 </Project>
