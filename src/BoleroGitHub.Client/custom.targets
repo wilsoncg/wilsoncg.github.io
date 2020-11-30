@@ -18,7 +18,7 @@ JsonString = $"{{\"posts\":[{ String.Join(",", withQuotes) }]}}";
   </UsingTask>
   <Target Name="GenerateIndexJsonForPostsFolder" BeforeTargets="GetCurrentProjectStaticWebAssets ">
     <ItemGroup>
-      <_MarkdownPosts Include="$(_postsFolder)\**\*.md" />
+      <_MarkdownPosts Include="$(_postsFolder)/**/*.md" />
       <_MarkdownPostsRelative Include="@(_MarkdownPosts->'posts/%(Filename)%(Extension)')" />
     </ItemGroup>
     <WriteJsonIndex Lines="@(_MarkdownPostsRelative)">
@@ -31,8 +31,8 @@ JsonString = $"{{\"posts\":[{ String.Join(",", withQuotes) }]}}";
             Encoding="utf-8"/>
   </Target>
   <PropertyGroup>
-    <_WwwRootPath>$([System.IO.Path]::Combine($(MSBuildProjectDirectory), `wwwroot`))</_WwwRootPath>
-    <_postsFolder>$([System.IO.Path]::Combine($(_WwwRootPath), `posts`))</_postsFolder>
-    <_jsonFile>$([System.IO.Path]::Combine($(_WwwRootPath), `posts`, `list.json`))</_jsonFile>
+    <_WwwRootPath>$([MSBuild]::NormalizeDirectory($(MSBuildProjectDirectory), `wwwroot`))</_WwwRootPath>
+    <_postsFolder>$([MSBuild]::NormalizeDirectory($(_WwwRootPath), `posts`))</_postsFolder>
+    <_jsonFile>$([MSBuild]::NormalizePath($(_postsFolder), `list.json`))</_jsonFile>
   </PropertyGroup>
 </Project>
