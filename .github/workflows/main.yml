@@ -2,7 +2,7 @@
 
 name: DeployToGitHubPages
 env:
-  PUBLISH_DIR: src/BoleroGitHub.Client/bin/Release/netstandard2.1/publish/wwwroot
+  PUBLISH_DIR: src/BoleroGitHub.Client/bin/Release/net5.0/publish/wwwroot
 
 # Controls when the action will run
 on:
@@ -14,6 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1.7.2
+      with:
+        dotnet-version: 5.0.100
 
     - name: Publish app
       run: dotnet publish -c Release
