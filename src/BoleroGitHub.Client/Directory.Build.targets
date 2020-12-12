@@ -16,7 +16,7 @@ JsonString = $"{{\"posts\":[{ String.Join(",", withQuotes) }]}}";
       </Code>
     </Task>
   </UsingTask>
-  <Target Name="GenerateIndexJsonForPostsFolder" BeforeTargets="GetCurrentProjectStaticWebAssets ">
+  <Target Name="GenerateIndexJsonForPostsFolder" AfterTargets="CoreBuild">
     <ItemGroup>
       <_MarkdownPosts Include="$(_postsFolder)/**/*.md" />
       <_MarkdownPostsRelative Include="@(_MarkdownPosts->'posts/%(Filename)%(Extension)')" />
