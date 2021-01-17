@@ -113,18 +113,58 @@
 
 <template id="Bot">
   <div id="main-content" role="main">
-    <article class="splash" itemscope itemtype="https://schema.org/CreativeWork">
-      <section class="page__content" itemprop="text">
-        <div
-          style="
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-            height: 100%;
-            margin: auto;
-            max-width: 480px;
-            min-width: 360px;" 
-          id="webchat"></div>
-      </section>
+
+    <div class="sidebar sticky">
+      <div itemscope="" itemtype="https://schema.org/Person">
+        <div class="author__avatar">
+            <img src="/assets/bot-rachael-icon.png" alt="Rachael Bot" itemprop="image">
+        </div>
+        <div class="author__content">
+          <h3 class="author__name" itemprop="name">Rachael</h3>
+          <div class="author__bio" itemprop="description">
+            <p>Nexus 6, <em>more human than human</em>.</p>
+          </div>            
+        </div>    
+        <div class="author__urls-wrapper">
+          <ul class="author__urls social-icons">              
+              <li itemprop="homeLocation" itemscope="" itemtype="https://schema.org/Place">
+                <i class="fas fa-cloud" aria-hidden="true"></i> <span itemprop="name">Azure Cloud</span>
+              </li>
+              <li>
+                <a href="/projects" rel="nofollow noopener noreferrer"><i class="fas fa-fw fa-link" aria-hidden="true"></i><span class="label">More info</span>
+                </a>
+              </li>
+              <li>
+                <a href="https://github.com/wilsoncg/bot" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub source code</span>
+                </a>
+              </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <article class="page" 
+      style="
+        width: calc(100% - 300px);
+        float: right;">
+      <div class="page__inner-wrap">
+        <section class="page__content" itemprop="text">
+          <p>Chat to Rachael:</p>
+          <div
+            style="
+              box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+              height: 100%;
+              min-width: 360px;" 
+            id="webchat"></div>
+        </section>
+        <footer class="page__meta">
+        </footer>
+      </div>
     </article>
+
+    <div class="archive">      
+    </div>
+
   </div>
 </template>
 
