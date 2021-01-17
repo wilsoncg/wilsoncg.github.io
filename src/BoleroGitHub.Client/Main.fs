@@ -17,6 +17,7 @@ type Page =
     | [<EndPoint "/posts">] Posts
     | [<EndPoint "/post/{postTitle}">] Post of postTitle: string
     | [<EndPoint "/projects">] Projects
+    | [<EndPoint "/bot">] Bot
 
 type Toggle = On | Off
 type LoadState = 
@@ -131,6 +132,7 @@ let update httpClient (jsRuntime:IJSRuntime) message model =
         | Projects -> Cmd.ofMsg LoadProjects
         | Posts -> Cmd.map PostPage (Cmd.ofMsg PostPage.LoadPostIndex)
         | Post p -> Cmd.map PostPage (Cmd.ofMsg (PostPage.LoadSinglePost p))
+        | Bot -> Cmd.OfJS.attempt jsRuntime "chat" [||] Error
         | _ -> Cmd.none
     | PostPage msg ->
         let nextState, nextCmd = PostPage.update httpClient jsRuntime msg model.posts
@@ -166,6 +168,11 @@ let homePage model dispatch =
   Main
     .Home()
     .SplashImage(model.splashImage)
+    .Elt()
+
+let botPage model dispatch =
+  Main
+    .Bot()
     .Elt()
 
 let menuItem (model: Model) (page: Page) (text: string) =
@@ -295,6 +302,7 @@ let view model dispatch =
             | Projects -> projectsPage model
             | Posts -> PostPage.showSimplePostList model.posts (PostPage >> dispatch)
             | Post t -> PostPage.postPage model.posts t (PostPage >> dispatch)
+            | Bot -> botPage model dispatch
         )
         .Year(DateTime.UtcNow.Year |> string |> text)
         .Elt()
