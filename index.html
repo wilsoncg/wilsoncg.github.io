@@ -1,0 +1,67 @@
+﻿<!DOCTYPE html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.19.3 by Michael Rose
+  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="keywords" content="index" />
+    <title>wilsoncg.net</title>
+    <base href="/">
+    <link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32">
+    <link rel="stylesheet" href="css/font-awesome-v5.14.0-all.min.css">
+    <link rel="stylesheet" href="css/highlight-10-1-2-vs2015.css">
+    <link rel="stylesheet" href="css/custom.css">
+    <link rel="stylesheet" href="css/minimal-mistakes-index.css">
+    <script
+      crossorigin="anonymous"
+      src="https://cdn.botframework.com/botframework-webchat/latest/webchat-es5.js">
+    </script>
+    <script src="/js/highlight-10-1-2.pack.js"></script>
+    <script src="/js/syntaxHighlight.js"></script>
+    <!-- Start Single Page Apps for GitHub Pages -->
+    <script type="text/javascript">
+        // Single Page Apps for GitHub Pages
+        // https://github.com/rafrex/spa-github-pages
+        // Copyright (c) 2016 Rafael Pedicini, licensed under the MIT License
+        // ----------------------------------------------------------------------
+        // This script checks to see if a redirect is present in the query string
+        // and converts it back into the correct url and adds it to the
+        // browser's history using window.history.replaceState(...),
+        // which won't cause the browser to attempt to load the new url.
+        // When the single page app is loaded further down in this file,
+        // the correct url will be waiting in the browser's history for
+        // the single page app to route accordingly.
+        (function (l) {
+            if (l.search) {
+                var q = {};
+                l.search.slice(1).split('&').forEach(function (v) {
+                    var a = v.split('=');
+                    q[a[0]] = a.slice(1).join('=').replace(/~and~/g, '&');
+                });
+                if (q.p !== undefined) {
+                    window.history.replaceState(null, null,
+                        l.pathname.slice(0, -1) + (q.p || '') +
+                        (q.q ? ('?' + q.q) : '') +
+                        l.hash
+                    );
+                }
+            }
+        }(window.location))
+    </script>
+    <!-- End Single Page Apps for GitHub Pages -->
+</head>
+  <body class="layout--splash" id="main">
+    <div class="loading-wrapper">
+      <img src="assets/003-webassembly.svg">
+      <div id="app"><span class="loader"></span><i class="fas fa-spin fa-spinner"></i> Loading...</div>
+    </div>
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script src="/js/windowResize.js"></script>
+    <script src="/js/webChat.js"></script>
+  </body>
+</html>
